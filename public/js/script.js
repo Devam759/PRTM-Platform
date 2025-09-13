@@ -7,6 +7,16 @@ class HealthCareHelper {
         this.voiceRecognition = null;
         this.isListening = false;
         this.apiBaseUrl = 'http://localhost:3000'; // Backend API URL
+        this.currentTheme = 'light'; // Default to light theme
+        this.cameraStream = null;
+        this.isCameraActive = false;
+        this.autoCaptureInterval = null;
+        this.analysisCanvas = null;
+        this.analysisContext = null;
+        this.lastClarityScore = 0;
+        this.clarityThreshold = 50; // Minimum clarity score for auto-capture (lowered for better responsiveness)
+        this.stableFramesRequired = 2; // Number of consecutive good frames needed (reduced)
+        this.stableFrameCount = 0;
         
         this.init();
     }
@@ -15,6 +25,8 @@ class HealthCareHelper {
         this.setupEventListeners();
         this.setupVoiceRecognition();
         this.loadUserPreferences();
+        this.initializeTheme();
+        this.initializeLanguage();
         this.showPage('home');
     }
 
@@ -113,6 +125,51 @@ class HealthCareHelper {
             });
         }
 
+        // Camera controls
+        const cameraBtn = document.getElementById('camera-btn');
+        if (cameraBtn) {
+            cameraBtn.addEventListener('click', () => {
+                this.startCamera();
+            });
+        }
+
+        const stopCameraBtn = document.getElementById('stop-camera-btn');
+        if (stopCameraBtn) {
+            stopCameraBtn.addEventListener('click', () => {
+                this.stopCamera();
+            });
+        }
+
+        const captureBtn = document.getElementById('capture-btn');
+        if (captureBtn) {
+            captureBtn.addEventListener('click', () => {
+                this.captureFromCamera();
+            });
+        }
+
+        // Add manual auto-capture trigger for testing
+        document.addEventListener('keydown', (e) => {
+            if (e.key === ' ' && this.isCameraActive) { // Spacebar to trigger auto-capture
+                e.preventDefault();
+                console.log('Manual auto-capture trigger');
+                this.performAutoCapture();
+            }
+            if (e.key === 't' && this.isCameraActive) { // 't' key to test clarity detection
+                e.preventDefault();
+                console.log('Testing clarity detection...');
+                this.testClarityDetection();
+            }
+        });
+
+        // Language toggle functionality
+        document.addEventListener('click', (e) => {
+            if (e.target.closest('.lang-btn')) {
+                const langBtn = e.target.closest('.lang-btn');
+                const language = langBtn.dataset.lang;
+                this.switchLanguage(language);
+            }
+        });
+
         // Keyboard navigation
         document.addEventListener('keydown', (e) => {
             this.handleKeyboardNavigation(e);
@@ -122,6 +179,14 @@ class HealthCareHelper {
         document.addEventListener('focusin', (e) => {
             this.handleFocusManagement(e);
         });
+
+        // Theme toggle
+        const themeToggle = document.getElementById('theme-toggle');
+        if (themeToggle) {
+            themeToggle.addEventListener('click', () => {
+                this.toggleTheme();
+            });
+        }
     }
 
     setupVoiceRecognition() {
@@ -180,6 +245,11 @@ class HealthCareHelper {
             this.renderDoctors();
         }
 
+        // Stop camera if leaving scanner page
+        if (this.currentPage === 'scan-medicine' && pageName !== 'scan-medicine') {
+            this.stopCamera();
+        }
+
         // Announce page change for screen readers
         this.announcePageChange(pageName);
     }
@@ -212,6 +282,404 @@ class HealthCareHelper {
             this.processMedicineImage(e.target.result, file.name);
         };
         reader.readAsDataURL(file);
+    }
+
+    // Camera Functions
+    async startCamera() {
+        try {
+            this.showNotification('Starting camera...', 'info');
+            
+            // Request camera access
+            this.cameraStream = await navigator.mediaDevices.getUserMedia({
+                video: {
+                    facingMode: 'environment', // Use back camera on mobile
+                    width: { ideal: 1280 },
+                    height: { ideal: 720 }
+                },
+                audio: false
+            });
+
+            const video = document.getElementById('camera-preview');
+            const uploadArea = document.getElementById('upload-area');
+            const cameraOverlay = document.getElementById('camera-overlay');
+            const viewport = document.getElementById('scanner-viewport');
+            
+            // Set up video stream
+            video.srcObject = this.cameraStream;
+            video.style.display = 'block';
+            
+            // Hide upload area and show camera overlay
+            uploadArea.style.display = 'none';
+            cameraOverlay.style.display = 'flex';
+            viewport.classList.add('camera-active');
+            
+            // Update button states
+            this.updateCameraButtons(true);
+            
+            // Initialize analysis canvas
+            this.initializeAnalysisCanvas();
+            
+            // Start auto-capture analysis
+            this.startAutoCaptureAnalysis();
+            
+            this.isCameraActive = true;
+            this.showNotification('Camera started successfully - Auto-capture enabled', 'success');
+            
+        } catch (error) {
+            console.error('Error starting camera:', error);
+            this.showNotification('Failed to start camera. Please check permissions.', 'error');
+            
+            // Fallback to upload mode
+            this.updateCameraButtons(false);
+        }
+    }
+
+    stopCamera() {
+        if (this.cameraStream) {
+            // Stop all tracks
+            this.cameraStream.getTracks().forEach(track => {
+                track.stop();
+            });
+            this.cameraStream = null;
+        }
+
+        const video = document.getElementById('camera-preview');
+        const uploadArea = document.getElementById('upload-area');
+        const cameraOverlay = document.getElementById('camera-overlay');
+        const viewport = document.getElementById('scanner-viewport');
+        
+        // Hide video and camera overlay, show upload area
+        video.style.display = 'none';
+        cameraOverlay.style.display = 'none';
+        uploadArea.style.display = 'flex';
+        viewport.classList.remove('camera-active');
+        
+        // Stop auto-capture analysis
+        this.stopAutoCaptureAnalysis();
+        
+        // Update button states
+        this.updateCameraButtons(false);
+        
+        this.isCameraActive = false;
+        this.showNotification('Camera stopped', 'info');
+    }
+
+    captureFromCamera() {
+        if (!this.isCameraActive || !this.cameraStream) {
+            this.showNotification('Camera is not active', 'error');
+            return;
+        }
+
+        try {
+            const video = document.getElementById('camera-preview');
+            const canvas = document.createElement('canvas');
+            const context = canvas.getContext('2d');
+            
+            // Set canvas dimensions to match video
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            
+            // Draw current video frame to canvas
+            context.drawImage(video, 0, 0, canvas.width, canvas.height);
+            
+            // Convert canvas to blob
+            canvas.toBlob((blob) => {
+                if (blob) {
+                    // Create a file from the blob
+                    const file = new File([blob], 'camera-capture.jpg', {
+                        type: 'image/jpeg',
+                        lastModified: Date.now()
+                    });
+                    
+                    // Process the captured image
+                    this.handleMedicinePhoto(file);
+                    
+                    // Stop camera after capture
+                    this.stopCamera();
+                    
+                    this.showNotification('Image captured successfully', 'success');
+                } else {
+                    this.showNotification('Failed to capture image', 'error');
+                }
+            }, 'image/jpeg', 0.8);
+            
+        } catch (error) {
+            console.error('Error capturing image:', error);
+            this.showNotification('Failed to capture image', 'error');
+        }
+    }
+
+    updateCameraButtons(isActive) {
+        const cameraBtn = document.getElementById('camera-btn');
+        const uploadBtn = document.getElementById('upload-btn');
+        const captureBtn = document.getElementById('capture-btn');
+        const stopBtn = document.getElementById('stop-camera-btn');
+        
+        if (isActive) {
+            // Camera is active - show capture and stop buttons
+            cameraBtn.style.display = 'none';
+            uploadBtn.style.display = 'none';
+            captureBtn.style.display = 'flex';
+            stopBtn.style.display = 'flex';
+        } else {
+            // Camera is not active - show start camera and upload buttons
+            cameraBtn.style.display = 'flex';
+            uploadBtn.style.display = 'flex';
+            captureBtn.style.display = 'none';
+            stopBtn.style.display = 'none';
+        }
+    }
+
+    // Auto-Capture Analysis Methods
+    initializeAnalysisCanvas() {
+        this.analysisCanvas = document.createElement('canvas');
+        this.analysisContext = this.analysisCanvas.getContext('2d');
+    }
+
+    startAutoCaptureAnalysis() {
+        if (this.autoCaptureInterval) {
+            clearInterval(this.autoCaptureInterval);
+        }
+
+        console.log('Starting auto-capture analysis...');
+        this.autoCaptureInterval = setInterval(() => {
+            this.analyzeFrame();
+        }, 200); // Analyze every 200ms
+    }
+
+    stopAutoCaptureAnalysis() {
+        if (this.autoCaptureInterval) {
+            clearInterval(this.autoCaptureInterval);
+            this.autoCaptureInterval = null;
+        }
+        this.stableFrameCount = 0;
+        this.lastClarityScore = 0;
+    }
+
+    analyzeFrame() {
+        if (!this.isCameraActive || !this.cameraStream) {
+            console.log('Camera not active or stream not available');
+            return;
+        }
+
+        const video = document.getElementById('camera-preview');
+        if (!video || video.videoWidth === 0) {
+            console.log('Video not ready:', { video: !!video, width: video?.videoWidth });
+            return;
+        }
+
+        try {
+            // Set canvas size to match video
+            this.analysisCanvas.width = video.videoWidth;
+            this.analysisCanvas.height = video.videoHeight;
+
+            // Draw current frame to canvas
+            this.analysisContext.drawImage(video, 0, 0, this.analysisCanvas.width, this.analysisCanvas.height);
+
+            // Analyze the frame for text clarity
+            const clarityScore = this.calculateTextClarity();
+            
+            console.log('Frame analysis:', { 
+                clarityScore, 
+                threshold: this.clarityThreshold, 
+                stableCount: this.stableFrameCount,
+                required: this.stableFramesRequired 
+            });
+            
+            // Update UI with analysis results
+            this.updateClarityUI(clarityScore);
+
+            // Check if we should auto-capture
+            if (clarityScore >= this.clarityThreshold) {
+                this.stableFrameCount++;
+                console.log(`Good frame detected! Count: ${this.stableFrameCount}/${this.stableFramesRequired}`);
+                if (this.stableFrameCount >= this.stableFramesRequired) {
+                    console.log('Triggering auto-capture!');
+                    this.performAutoCapture();
+                }
+            } else {
+                this.stableFrameCount = 0;
+            }
+
+        } catch (error) {
+            console.error('Error analyzing frame:', error);
+        }
+    }
+
+    calculateTextClarity() {
+        if (!this.analysisContext) return 0;
+
+        const imageData = this.analysisContext.getImageData(0, 0, this.analysisCanvas.width, this.analysisCanvas.height);
+        const data = imageData.data;
+
+        // Focus on the center region (where medicine name is likely to be)
+        const centerX = Math.floor(this.analysisCanvas.width * 0.2);
+        const centerY = Math.floor(this.analysisCanvas.height * 0.2);
+        const regionWidth = Math.floor(this.analysisCanvas.width * 0.6);
+        const regionHeight = Math.floor(this.analysisCanvas.height * 0.6);
+
+        let edgeCount = 0;
+        let totalPixels = 0;
+        let contrastSum = 0;
+        let sharpnessSum = 0;
+
+        // Analyze the center region for text-like features
+        for (let y = centerY; y < centerY + regionHeight; y += 1) {
+            for (let x = centerX; x < centerX + regionWidth; x += 1) {
+                const index = (y * this.analysisCanvas.width + x) * 4;
+                
+                if (index + 3 < data.length) {
+                    const r = data[index];
+                    const g = data[index + 1];
+                    const b = data[index + 2];
+                    const gray = (r + g + b) / 3;
+
+                    // Check for edges (text boundaries) - improved edge detection
+                    if (x > centerX && y > centerY && x < centerX + regionWidth - 1 && y < centerY + regionHeight - 1) {
+                        // Check horizontal edge
+                        const rightIndex = (y * this.analysisCanvas.width + (x + 1)) * 4;
+                        if (rightIndex + 2 < data.length) {
+                            const rightGray = (data[rightIndex] + data[rightIndex + 1] + data[rightIndex + 2]) / 3;
+                            const horizontalEdge = Math.abs(gray - rightGray);
+                            
+                            if (horizontalEdge > 20) {
+                                edgeCount++;
+                            }
+                        }
+
+                        // Check vertical edge
+                        const bottomIndex = ((y + 1) * this.analysisCanvas.width + x) * 4;
+                        if (bottomIndex + 2 < data.length) {
+                            const bottomGray = (data[bottomIndex] + data[bottomIndex + 1] + data[bottomIndex + 2]) / 3;
+                            const verticalEdge = Math.abs(gray - bottomGray);
+                            
+                            if (verticalEdge > 20) {
+                                edgeCount++;
+                            }
+                        }
+                    }
+
+                    // Calculate contrast
+                    const contrast = Math.abs(gray - 128) / 128;
+                    contrastSum += contrast;
+                    
+                    // Calculate sharpness (local variance)
+                    if (x > centerX && y > centerY && x < centerX + regionWidth - 1 && y < centerY + regionHeight - 1) {
+                        const neighbors = [];
+                        for (let dy = -1; dy <= 1; dy++) {
+                            for (let dx = -1; dx <= 1; dx++) {
+                                const neighborIndex = ((y + dy) * this.analysisCanvas.width + (x + dx)) * 4;
+                                if (neighborIndex + 2 < data.length) {
+                                    const neighborGray = (data[neighborIndex] + data[neighborIndex + 1] + data[neighborIndex + 2]) / 3;
+                                    neighbors.push(neighborGray);
+                                }
+                            }
+                        }
+                        
+                        if (neighbors.length > 0) {
+                            const mean = neighbors.reduce((a, b) => a + b, 0) / neighbors.length;
+                            const variance = neighbors.reduce((sum, val) => sum + Math.pow(val - mean, 2), 0) / neighbors.length;
+                            sharpnessSum += Math.sqrt(variance);
+                        }
+                    }
+                    
+                    totalPixels++;
+                }
+            }
+        }
+
+        // Calculate clarity score based on edge density, contrast, and sharpness
+        const edgeDensity = totalPixels > 0 ? (edgeCount / totalPixels) * 100 : 0;
+        const averageContrast = totalPixels > 0 ? (contrastSum / totalPixels) * 100 : 0;
+        const averageSharpness = totalPixels > 0 ? (sharpnessSum / totalPixels) * 2 : 0;
+        
+        // Combine metrics for overall clarity score (adjusted weights)
+        const clarityScore = Math.min(100, (edgeDensity * 0.4) + (averageContrast * 0.3) + (averageSharpness * 0.3));
+        
+        // Boost score if we detect good text-like features
+        let finalScore = Math.round(clarityScore);
+        
+        // Additional boost for high contrast text
+        if (averageContrast > 30 && edgeDensity > 5) {
+            finalScore = Math.min(100, finalScore + 15);
+        }
+        
+        return finalScore;
+    }
+
+    updateClarityUI(clarityScore) {
+        const statusIndicator = document.getElementById('status-indicator');
+        const statusIcon = document.getElementById('status-icon');
+        const statusText = document.getElementById('status-text');
+        const clarityFill = document.getElementById('clarity-fill');
+        const clarityText = document.getElementById('clarity-text');
+
+        if (!statusIndicator || !clarityFill) return;
+
+        // Update clarity meter
+        clarityFill.style.width = `${clarityScore}%`;
+        clarityText.textContent = `${clarityScore}%`;
+
+        // Update status based on clarity score
+        if (clarityScore < 30) {
+            statusIndicator.className = 'status-indicator analyzing';
+            statusIcon.className = 'fas fa-search';
+            statusText.textContent = 'Analyzing...';
+            clarityFill.className = 'clarity-fill analyzing';
+        } else if (clarityScore < 60) {
+            statusIndicator.className = 'status-indicator detected';
+            statusIcon.className = 'fas fa-eye';
+            statusText.textContent = 'Text detected';
+            clarityFill.className = 'clarity-fill detected';
+        } else if (clarityScore < this.clarityThreshold) {
+            statusIndicator.className = 'status-indicator ready';
+            statusIcon.className = 'fas fa-check-circle';
+            statusText.textContent = 'Almost ready...';
+            clarityFill.className = 'clarity-fill ready';
+        } else {
+            statusIndicator.className = 'status-indicator capturing';
+            statusIcon.className = 'fas fa-camera';
+            statusText.textContent = 'Capturing...';
+            clarityFill.className = 'clarity-fill ready';
+        }
+    }
+
+    performAutoCapture() {
+        if (!this.isCameraActive) {
+            console.log('Cannot auto-capture: camera not active');
+            return;
+        }
+
+        console.log('Performing auto-capture...');
+        
+        // Stop auto-analysis to prevent multiple captures
+        this.stopAutoCaptureAnalysis();
+        
+        // Show capturing status
+        this.updateClarityUI(100);
+        
+        // Small delay to show the capturing state
+        setTimeout(() => {
+            this.captureFromCamera();
+        }, 500);
+    }
+
+    testClarityDetection() {
+        if (!this.isCameraActive) return;
+        
+        console.log('Running clarity detection test...');
+        
+        // Simulate a good clarity score for testing
+        const testScore = 80;
+        console.log(`Test clarity score: ${testScore}`);
+        
+        this.updateClarityUI(testScore);
+        this.stableFrameCount = this.stableFramesRequired;
+        
+        setTimeout(() => {
+            console.log('Test auto-capture triggered');
+            this.performAutoCapture();
+        }, 1000);
     }
 
     async processMedicineImage(imageData, fileName) {
@@ -264,23 +732,53 @@ class HealthCareHelper {
         const medicines = [
             {
                 name: 'Paracetamol 500mg',
+                nameHindi: 'पैरासिटामोल 500mg',
                 description: 'Pain reliever and fever reducer. Used to treat mild to moderate pain and reduce fever.',
+                descriptionHindi: 'दर्द निवारक और बुखार कम करने वाली दवा। हल्के से मध्यम दर्द और बुखार के इलाज के लिए उपयोगी।',
                 precautions: 'Do not exceed 4 grams per day. Consult doctor if symptoms persist for more than 3 days.',
+                precautionsHindi: 'प्रतिदिन 4 ग्राम से अधिक न लें। यदि लक्षण 3 दिन से अधिक बने रहें तो डॉक्टर से सलाह लें।',
                 usage: 'Take 1-2 tablets every 4-6 hours as needed. Take with food to avoid stomach upset.',
+                usageHindi: 'आवश्यकतानुसार हर 4-6 घंटे में 1-2 गोली लें। पेट की परेशानी से बचने के लिए भोजन के साथ लें।',
+                composition: 'Acetaminophen - Analgesic and antipyretic agent',
+                compositionHindi: 'एसिटामिनोफेन - दर्द निवारक और ज्वरनाशक एजेंट',
+                contraindications: 'Avoid if allergic to acetaminophen. Do not exceed recommended dose. Consult doctor if pregnant or breastfeeding.',
+                contraindicationsHindi: 'यदि एसिटामिनोफेन से एलर्जी है तो बचें। अनुशंसित खुराक से अधिक न लें। गर्भवती या स्तनपान कराने वाली महिलाएं डॉक्टर से सलाह लें।',
+                dosageProtocol: 'Adults: 500-1000mg every 4-6 hours. Maximum 4g per day. Children: 10-15mg/kg every 4-6 hours.',
+                dosageProtocolHindi: 'वयस्क: हर 4-6 घंटे में 500-1000mg। प्रतिदिन अधिकतम 4g। बच्चे: हर 4-6 घंटे में 10-15mg/kg।',
                 image: imageData
             },
             {
                 name: 'Aspirin 100mg',
+                nameHindi: 'एस्पिरिन 100mg',
                 description: 'Anti-inflammatory and pain reliever. Also used for heart protection in low doses.',
+                descriptionHindi: 'सूजनरोधी और दर्द निवारक। कम खुराक में हृदय सुरक्षा के लिए भी उपयोगी।',
                 precautions: 'May cause stomach irritation. Avoid if allergic to aspirin. Do not give to children under 16.',
+                precautionsHindi: 'पेट में जलन हो सकती है। एस्पिरिन से एलर्जी हो तो बचें। 16 साल से कम उम्र के बच्चों को न दें।',
                 usage: 'Take 1 tablet daily with food. Take at the same time each day for best results.',
+                usageHindi: 'भोजन के साथ प्रतिदिन 1 गोली लें। बेहतर परिणाम के लिए हर दिन एक ही समय पर लें।',
+                composition: 'Acetylsalicylic acid - NSAID with antiplatelet effects',
+                compositionHindi: 'एसिटाइलसैलिसिलिक एसिड - एंटीप्लेटलेट प्रभाव के साथ NSAID',
+                contraindications: 'Avoid if allergic to aspirin. Do not use in children under 16. Avoid if bleeding disorders or stomach ulcers.',
+                contraindicationsHindi: 'एस्पिरिन से एलर्जी हो तो बचें। 16 साल से कम उम्र में न लें। रक्तस्राव विकार या पेट के अल्सर में बचें।',
+                dosageProtocol: 'Adults: 75-100mg daily for heart protection. 300-600mg for pain relief. Maximum 4g per day.',
+                dosageProtocolHindi: 'वयस्क: हृदय सुरक्षा के लिए प्रतिदिन 75-100mg। दर्द निवारण के लिए 300-600mg। प्रतिदिन अधिकतम 4g।',
                 image: imageData
             },
             {
                 name: 'Ibuprofen 400mg',
+                nameHindi: 'आइबुप्रोफेन 400mg',
                 description: 'Non-steroidal anti-inflammatory drug (NSAID) for pain, inflammation, and fever.',
+                descriptionHindi: 'दर्द, सूजन और बुखार के लिए गैर-स्टेरॉयडल सूजनरोधी दवा (NSAID)।',
                 precautions: 'May cause stomach problems. Take with food. Avoid if you have heart or kidney problems.',
+                precautionsHindi: 'पेट की समस्याएं हो सकती हैं। भोजन के साथ लें। हृदय या गुर्दे की समस्याओं में बचें।',
                 usage: 'Take 1 tablet every 6-8 hours with food. Do not exceed 6 tablets in 24 hours.',
+                usageHindi: 'भोजन के साथ हर 6-8 घंटे में 1 गोली लें। 24 घंटे में 6 गोलियों से अधिक न लें।',
+                composition: 'Ibuprofen - Non-steroidal anti-inflammatory drug',
+                compositionHindi: 'आइबुप्रोफेन - गैर-स्टेरॉयडल सूजनरोधी दवा',
+                contraindications: 'Avoid if allergic to NSAIDs. Do not use if stomach ulcers, heart problems, or kidney disease.',
+                contraindicationsHindi: 'NSAIDs से एलर्जी हो तो बचें। पेट के अल्सर, हृदय समस्याओं या गुर्दे की बीमारी में न लें।',
+                dosageProtocol: 'Adults: 200-400mg every 6-8 hours. Maximum 2400mg per day. Take with food.',
+                dosageProtocolHindi: 'वयस्क: हर 6-8 घंटे में 200-400mg। प्रतिदिन अधिकतम 2400mg। भोजन के साथ लें।',
                 image: imageData
             }
         ];
@@ -292,11 +790,7 @@ class HealthCareHelper {
     displayMedicineResults(imageData, medicineInfo) {
         const resultsContainer = document.getElementById('medicine-results');
         const imageElement = document.getElementById('scanned-image');
-        const nameElement = document.getElementById('medicine-name');
-        const descriptionElement = document.getElementById('medicine-description');
-        const precautionsElement = document.getElementById('medicine-precautions');
-        const usageElement = document.getElementById('medicine-usage');
-
+        
         // Handle both data URLs and API URLs
         if (imageData.startsWith('data:')) {
             imageElement.src = imageData;
@@ -305,25 +799,13 @@ class HealthCareHelper {
         }
         
         imageElement.alt = `Scanned image of ${medicineInfo.name}`;
-        nameElement.textContent = medicineInfo.name;
         
-        // Handle different data structures from API vs local
-        if (typeof medicineInfo.description === 'string') {
-            descriptionElement.textContent = medicineInfo.description;
-        } else if (Array.isArray(medicineInfo.uses)) {
-            descriptionElement.textContent = medicineInfo.uses.join(', ');
-        }
+        // Update English content
+        this.updateMedicineContent(medicineInfo, 'english');
         
-        if (typeof medicineInfo.precautions === 'string') {
-            precautionsElement.textContent = medicineInfo.precautions;
-        } else if (Array.isArray(medicineInfo.precautions)) {
-            precautionsElement.textContent = medicineInfo.precautions.join(', ');
-        }
-        
-        if (medicineInfo.dosageInstructions) {
-            usageElement.textContent = medicineInfo.dosageInstructions;
-        } else if (medicineInfo.usage) {
-            usageElement.textContent = medicineInfo.usage;
+        // Update Hindi content if available
+        if (medicineInfo.nameHindi) {
+            this.updateMedicineContent(medicineInfo, 'hindi');
         }
 
         resultsContainer.style.display = 'block';
@@ -331,6 +813,72 @@ class HealthCareHelper {
 
         // Save to recent activity
         this.saveRecentActivity('medicine', medicineInfo.name);
+    }
+
+    updateMedicineContent(medicineInfo, language) {
+        const suffix = language === 'hindi' ? '-hindi' : '';
+        
+        // Update medicine name
+        const nameElement = document.getElementById(`medicine-name${suffix}`);
+        if (nameElement) {
+            nameElement.textContent = language === 'hindi' ? medicineInfo.nameHindi : medicineInfo.name;
+        }
+        
+        // Update composition
+        const compositionElement = document.getElementById(`medicine-composition${suffix}`);
+        if (compositionElement) {
+            const composition = language === 'hindi' ? medicineInfo.compositionHindi : medicineInfo.composition;
+            compositionElement.textContent = composition || 'Composition information not available';
+        }
+        
+        // Update contraindications
+        const contraindicationsElement = document.getElementById(`medicine-contraindications${suffix}`);
+        if (contraindicationsElement) {
+            const contraindications = language === 'hindi' ? medicineInfo.contraindicationsHindi : medicineInfo.contraindications;
+            contraindicationsElement.textContent = contraindications || 'Contraindications information not available';
+        }
+        
+        // Update dosage protocol
+        const dosageElement = document.getElementById(`medicine-dosage-protocol${suffix}`);
+        if (dosageElement) {
+            const dosage = language === 'hindi' ? medicineInfo.dosageProtocolHindi : medicineInfo.dosageProtocol;
+            dosageElement.textContent = dosage || 'Dosage protocol not available';
+        }
+        
+        // Update precautions
+        const precautionsElement = document.getElementById(`medicine-precautions${suffix}`);
+        if (precautionsElement) {
+            const precautions = language === 'hindi' ? medicineInfo.precautionsHindi : medicineInfo.precautions;
+            precautionsElement.textContent = precautions || 'Precautions information not available';
+        }
+        
+        // Update usage instructions
+        const usageElement = document.getElementById(`medicine-usage${suffix}`);
+        if (usageElement) {
+            const usage = language === 'hindi' ? medicineInfo.usageHindi : medicineInfo.usage;
+            usageElement.textContent = usage || 'Usage instructions not available';
+        }
+    }
+
+    switchLanguage(language) {
+        // Update button states
+        document.querySelectorAll('.lang-btn').forEach(btn => {
+            btn.classList.remove('active');
+        });
+        document.getElementById(`lang-${language}`).classList.add('active');
+        
+        // Show/hide content
+        document.querySelectorAll('.language-content').forEach(content => {
+            content.style.display = 'none';
+        });
+        document.getElementById(`content-${language}`).style.display = 'block';
+        
+        // Save language preference
+        localStorage.setItem('preferred-language', language);
+        
+        // Show notification
+        const langName = language === 'hindi' ? 'Hindi' : 'English';
+        this.showNotification(`Switched to ${langName}`, 'info');
     }
 
     // Doctor Management
@@ -425,25 +973,55 @@ class HealthCareHelper {
     }
 
     loadMedicineDatabase() {
-        // Simulate offline medicine database
+        // Simulate offline medicine database with Hindi translations
         return {
             'paracetamol': {
                 name: 'Paracetamol 500mg',
+                nameHindi: 'पैरासिटामोल 500mg',
                 description: 'Pain reliever and fever reducer',
+                descriptionHindi: 'दर्द निवारक और बुखार कम करने वाली दवा',
                 precautions: 'Do not exceed 4 grams per day',
-                usage: 'Take 1-2 tablets every 4-6 hours'
+                precautionsHindi: 'प्रतिदिन 4 ग्राम से अधिक न लें',
+                usage: 'Take 1-2 tablets every 4-6 hours',
+                usageHindi: 'हर 4-6 घंटे में 1-2 गोली लें',
+                composition: 'Acetaminophen - Analgesic and antipyretic',
+                compositionHindi: 'एसिटामिनोफेन - दर्द निवारक और ज्वरनाशक',
+                contraindications: 'Avoid if allergic to acetaminophen. Do not exceed recommended dose.',
+                contraindicationsHindi: 'यदि एसिटामिनोफेन से एलर्जी है तो बचें। अनुशंसित खुराक से अधिक न लें।',
+                dosageProtocol: 'Adults: 500-1000mg every 4-6 hours. Maximum 4g per day.',
+                dosageProtocolHindi: 'वयस्क: हर 4-6 घंटे में 500-1000mg। प्रतिदिन अधिकतम 4g।'
             },
             'aspirin': {
                 name: 'Aspirin 100mg',
-                description: 'Anti-inflammatory and pain reliever',
-                precautions: 'May cause stomach irritation',
-                usage: 'Take 1 tablet daily with food'
+                nameHindi: 'एस्पिरिन 100mg',
+                description: 'Anti-inflammatory and pain reliever. Also used for heart protection in low doses.',
+                descriptionHindi: 'सूजनरोधी और दर्द निवारक। कम खुराक में हृदय सुरक्षा के लिए भी उपयोगी।',
+                precautions: 'May cause stomach irritation. Avoid if allergic to aspirin. Do not give to children under 16.',
+                precautionsHindi: 'पेट में जलन हो सकती है। एस्पिरिन से एलर्जी हो तो बचें। 16 साल से कम उम्र के बच्चों को न दें।',
+                usage: 'Take 1 tablet daily with food',
+                usageHindi: 'भोजन के साथ प्रतिदिन 1 गोली लें',
+                composition: 'Acetylsalicylic acid - NSAID with antiplatelet effects',
+                compositionHindi: 'एसिटाइलसैलिसिलिक एसिड - एंटीप्लेटलेट प्रभाव के साथ NSAID',
+                contraindications: 'Avoid if allergic to aspirin. Do not use in children under 16. Avoid if bleeding disorders.',
+                contraindicationsHindi: 'एस्पिरिन से एलर्जी हो तो बचें। 16 साल से कम उम्र में न लें। रक्तस्राव विकार में बचें।',
+                dosageProtocol: 'Adults: 75-100mg daily for heart protection. 300-600mg for pain relief.',
+                dosageProtocolHindi: 'वयस्क: हृदय सुरक्षा के लिए प्रतिदिन 75-100mg। दर्द निवारण के लिए 300-600mg।'
             },
             'ibuprofen': {
                 name: 'Ibuprofen 400mg',
+                nameHindi: 'आइबुप्रोफेन 400mg',
                 description: 'NSAID for pain and inflammation',
+                descriptionHindi: 'दर्द और सूजन के लिए NSAID',
                 precautions: 'Take with food to avoid stomach problems',
-                usage: 'Take 1 tablet every 6-8 hours'
+                precautionsHindi: 'पेट की समस्याओं से बचने के लिए भोजन के साथ लें',
+                usage: 'Take 1 tablet every 6-8 hours',
+                usageHindi: 'हर 6-8 घंटे में 1 गोली लें',
+                composition: 'Ibuprofen - Non-steroidal anti-inflammatory drug',
+                compositionHindi: 'आइबुप्रोफेन - गैर-स्टेरॉयडल सूजनरोधी दवा',
+                contraindications: 'Avoid if allergic to NSAIDs. Do not use if stomach ulcers or heart problems.',
+                contraindicationsHindi: 'NSAIDs से एलर्जी हो तो बचें। पेट के अल्सर या हृदय समस्याओं में न लें।',
+                dosageProtocol: 'Adults: 200-400mg every 6-8 hours. Maximum 2400mg per day.',
+                dosageProtocolHindi: 'वयस्क: हर 6-8 घंटे में 200-400mg। प्रतिदिन अधिकतम 2400mg।'
             }
         };
     }
@@ -820,6 +1398,62 @@ class HealthCareHelper {
         if (preferences.highContrast) {
             document.body.classList.add('high-contrast');
         }
+
+        // Load theme preference
+        if (preferences.theme) {
+            this.currentTheme = preferences.theme;
+        }
+    }
+
+    initializeTheme() {
+        // Set initial theme
+        this.applyTheme(this.currentTheme);
+        this.updateThemeIcon();
+    }
+
+    toggleTheme() {
+        this.currentTheme = this.currentTheme === 'light' ? 'dark' : 'light';
+        this.applyTheme(this.currentTheme);
+        this.updateThemeIcon();
+        this.saveThemePreference();
+        
+        // Show notification
+        const themeName = this.currentTheme === 'light' ? 'Light' : 'Dark';
+        this.showNotification(`Switched to ${themeName} theme`, 'info');
+    }
+
+    applyTheme(theme) {
+        const html = document.documentElement;
+        
+        if (theme === 'dark') {
+            html.setAttribute('data-theme', 'dark');
+        } else {
+            html.removeAttribute('data-theme');
+        }
+        
+        this.currentTheme = theme;
+    }
+
+    updateThemeIcon() {
+        const themeIcon = document.getElementById('theme-icon');
+        if (themeIcon) {
+            if (this.currentTheme === 'light') {
+                themeIcon.className = 'fas fa-sun';
+            } else {
+                themeIcon.className = 'fas fa-moon';
+            }
+        }
+    }
+
+    saveThemePreference() {
+        const preferences = JSON.parse(localStorage.getItem('user-preferences') || '{}');
+        preferences.theme = this.currentTheme;
+        localStorage.setItem('user-preferences', JSON.stringify(preferences));
+    }
+
+    initializeLanguage() {
+        const savedLanguage = localStorage.getItem('preferred-language') || 'english';
+        this.switchLanguage(savedLanguage);
     }
 
     showNotification(message, type = 'info') {

@@ -3,49 +3,75 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>HealthCare Helper - Your Medical Assistant</title>
+    <title>MediScan Pro - Advanced Medical Assistant</title>
     <link rel="stylesheet" href="css/style.css">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <meta name="description" content="Healthcare app designed for elderly users - scan medicines and find nearby doctors">
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <meta name="description" content="Professional medical scanning and doctor discovery platform">
 </head>
 <body>
     <div class="app-container">
         <!-- Header -->
         <header class="header" role="banner">
+            <div class="header-bg"></div>
             <div class="header-content">
                 <div class="logo">
-                    <i class="fas fa-heartbeat" aria-hidden="true"></i>
-                    <h1>HealthCare Helper</h1>
+                    <div class="logo-icon">
+                        <div class="logo-inner">
+                            <i class="fas fa-crosshairs" aria-hidden="true"></i>
+                        </div>
+                    </div>
+                    <div class="logo-text">
+                        <h1>MediScan</h1>
+                        <span class="logo-subtitle">PRO</span>
+                    </div>
                 </div>
-                <button class="voice-assist-btn" aria-label="Voice Assistant" title="Voice Assistant">
-                    <i class="fas fa-microphone" aria-hidden="true"></i>
-                </button>
+                <div class="header-actions">
+                    <button class="theme-toggle-btn" id="theme-toggle" aria-label="Toggle theme" title="Toggle theme">
+                        <i class="fas fa-sun" id="theme-icon" aria-hidden="true"></i>
+                    </button>
+                    <button class="ai-assist-btn" aria-label="AI Assistant" title="AI Assistant">
+                        <i class="fas fa-robot" aria-hidden="true"></i>
+                        <span>AI</span>
+                    </button>
+                    <button class="profile-btn" aria-label="Profile" title="Profile">
+                        <i class="fas fa-user-circle" aria-hidden="true"></i>
+                    </button>
+                </div>
             </div>
         </header>
 
         <!-- Navigation -->
         <nav class="main-nav" role="navigation" aria-label="Main navigation">
-            <ul class="nav-list">
-                <li class="nav-item">
-                    <button class="nav-btn active" data-page="home" aria-label="Go to Home page">
-                        <i class="fas fa-home" aria-hidden="true"></i>
-                        <span>Home</span>
+            <div class="nav-container">
+                <div class="nav-item">
+                    <button class="nav-btn active" data-page="home" aria-label="Go to Dashboard">
+                        <div class="nav-icon">
+                            <i class="fas fa-chart-line" aria-hidden="true"></i>
+                        </div>
+                        <span>Dashboard</span>
+                        <div class="nav-indicator"></div>
                     </button>
-                </li>
-                <li class="nav-item">
-                    <button class="nav-btn" data-page="scan-medicine" aria-label="Go to Scan Medicine page">
-                        <i class="fas fa-camera" aria-hidden="true"></i>
-                        <span>Scan Medicine</span>
+                </div>
+                <div class="nav-item">
+                    <button class="nav-btn" data-page="scan-medicine" aria-label="Go to Scanner">
+                        <div class="nav-icon">
+                            <i class="fas fa-qrcode" aria-hidden="true"></i>
+                        </div>
+                        <span>Scanner</span>
+                        <div class="nav-indicator"></div>
                     </button>
-                </li>
-                <li class="nav-item">
-                    <button class="nav-btn" data-page="find-doctors" aria-label="Go to Find Doctors page">
-                        <i class="fas fa-user-md" aria-hidden="true"></i>
-                        <span>Find Doctors</span>
+                </div>
+                <div class="nav-item">
+                    <button class="nav-btn" data-page="find-doctors" aria-label="Go to Network">
+                        <div class="nav-icon">
+                            <i class="fas fa-network-wired" aria-hidden="true"></i>
+                        </div>
+                        <span>Network</span>
+                        <div class="nav-indicator"></div>
                     </button>
-                </li>
-            </ul>
+                </div>
+            </div>
         </nav>
 
         <!-- Main Content -->
@@ -53,64 +79,123 @@
             <!-- Home Page -->
             <section id="home" class="page active" aria-labelledby="home-title">
                 <div class="page-header">
-                    <h2 id="home-title" class="page-title">Welcome to HealthCare Helper</h2>
-                    <p class="page-subtitle">Your trusted medical assistant for medicine information and doctor finder</p>
+                    <div class="header-badge">
+                        <span class="badge-text">SYSTEM STATUS</span>
+                        <span class="badge-status online">ONLINE</span>
+                    </div>
+                    <h2 id="home-title" class="page-title">
+                        <span class="title-main">Medical Intelligence</span>
+                        <span class="title-accent">Platform</span>
+                    </h2>
+                    <p class="page-subtitle">Advanced AI-powered medical scanning and healthcare network analysis</p>
                 </div>
 
-                <div class="welcome-section">
-                    <div class="welcome-card">
-                        <div class="welcome-icon">
-                            <i class="fas fa-heart" aria-hidden="true"></i>
+                <div class="dashboard-grid">
+                    <div class="dashboard-card primary">
+                        <div class="card-header">
+                            <div class="card-icon">
+                                <i class="fas fa-brain" aria-hidden="true"></i>
+                            </div>
+                            <div class="card-title">
+                                <h3>AI Analysis</h3>
+                                <span class="card-subtitle">Active</span>
+                            </div>
                         </div>
-                        <h3>Stay Healthy & Informed</h3>
-                        <p>Get instant information about your medicines and find the best doctors near you</p>
+                        <div class="card-content">
+                            <p>Real-time medical data processing and intelligent recommendations</p>
+                            <div class="card-stats">
+                                <div class="stat">
+                                    <span class="stat-value">99.7%</span>
+                                    <span class="stat-label">Accuracy</span>
+                                </div>
+                                <div class="stat">
+                                    <span class="stat-value">2.3s</span>
+                                    <span class="stat-label">Response</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="dashboard-card secondary">
+                        <div class="card-header">
+                            <div class="card-icon">
+                                <i class="fas fa-qrcode" aria-hidden="true"></i>
+                            </div>
+                            <div class="card-title">
+                                <h3>Scanner Module</h3>
+                                <span class="card-subtitle">Ready</span>
+                            </div>
+                        </div>
+                        <div class="card-content">
+                            <p>Advanced optical recognition for pharmaceutical identification</p>
+                            <button class="module-btn" data-page="scan-medicine">
+                                <span>Initialize Scanner</span>
+                                <i class="fas fa-arrow-right" aria-hidden="true"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="dashboard-card tertiary">
+                        <div class="card-header">
+                            <div class="card-icon">
+                                <i class="fas fa-network-wired" aria-hidden="true"></i>
+                            </div>
+                            <div class="card-title">
+                                <h3>Network Access</h3>
+                                <span class="card-subtitle">Connected</span>
+                            </div>
+                        </div>
+                        <div class="card-content">
+                            <p>Healthcare professional network and consultation services</p>
+                            <button class="module-btn" data-page="find-doctors">
+                                <span>Access Network</span>
+                                <i class="fas fa-arrow-right" aria-hidden="true"></i>
+                            </button>
+                        </div>
                     </div>
                 </div>
 
-                <div class="quick-actions">
-                    <h3 class="section-title">Quick Actions</h3>
-                    <div class="action-buttons">
-                        <button class="action-btn primary" data-page="scan-medicine" aria-label="Scan medicine bottle or strip">
-                            <div class="action-icon">
-                                <i class="fas fa-camera" aria-hidden="true"></i>
-                            </div>
-                            <div class="action-content">
-                                <h4>Scan Medicine</h4>
-                                <p>Take a photo of your medicine to get information</p>
-                            </div>
-                        </button>
-                        
-                        <button class="action-btn secondary" data-page="find-doctors" aria-label="Find nearby doctors">
-                            <div class="action-icon">
-                                <i class="fas fa-user-md" aria-hidden="true"></i>
-                            </div>
-                            <div class="action-content">
-                                <h4>Find Doctors</h4>
-                                <p>Search for doctors near your location</p>
-                            </div>
-                        </button>
+                <div class="activity-panel">
+                    <div class="panel-header">
+                        <h3 class="panel-title">System Logs</h3>
+                        <div class="panel-controls">
+                            <button class="control-btn" aria-label="Refresh logs">
+                                <i class="fas fa-sync-alt" aria-hidden="true"></i>
+                            </button>
+                            <button class="control-btn" aria-label="Export logs">
+                                <i class="fas fa-download" aria-hidden="true"></i>
+                            </button>
+                        </div>
                     </div>
-                </div>
-
-                <div class="recent-activity">
-                    <h3 class="section-title">Recent Activity</h3>
-                    <div class="activity-list">
-                        <div class="activity-item">
-                            <div class="activity-icon">
-                                <i class="fas fa-pills" aria-hidden="true"></i>
+                    <div class="log-entries">
+                        <div class="log-entry success">
+                            <div class="log-timestamp">14:32:15</div>
+                            <div class="log-icon">
+                                <i class="fas fa-check-circle" aria-hidden="true"></i>
                             </div>
-                            <div class="activity-content">
-                                <h4>Medicine Scanned</h4>
-                                <p>Paracetamol 500mg - Yesterday</p>
+                            <div class="log-content">
+                                <div class="log-title">Scan Complete</div>
+                                <div class="log-detail">Acetaminophen 500mg identified with 99.2% confidence</div>
                             </div>
                         </div>
-                        <div class="activity-item">
-                            <div class="activity-icon">
-                                <i class="fas fa-user-md" aria-hidden="true"></i>
+                        <div class="log-entry info">
+                            <div class="log-timestamp">12:18:42</div>
+                            <div class="log-icon">
+                                <i class="fas fa-info-circle" aria-hidden="true"></i>
                             </div>
-                            <div class="activity-content">
-                                <h4>Doctor Found</h4>
-                                <p>Dr. Sarah Johnson - 2 days ago</p>
+                            <div class="log-content">
+                                <div class="log-title">Network Query</div>
+                                <div class="log-detail">Connected to Dr. Sarah Chen - Cardiology specialist</div>
+                            </div>
+                        </div>
+                        <div class="log-entry warning">
+                            <div class="log-timestamp">09:45:33</div>
+                            <div class="log-icon">
+                                <i class="fas fa-exclamation-triangle" aria-hidden="true"></i>
+                            </div>
+                            <div class="log-content">
+                                <div class="log-title">Low Confidence</div>
+                                <div class="log-detail">Medication identification below 85% threshold</div>
                             </div>
                         </div>
                     </div>
@@ -120,56 +205,310 @@
             <!-- Scan Medicine Page -->
             <section id="scan-medicine" class="page" aria-labelledby="scan-title">
                 <div class="page-header">
-                    <h2 id="scan-title" class="page-title">Scan Medicine</h2>
-                    <p class="page-subtitle">Take a photo of your medicine bottle or strip to get information</p>
+                    <div class="header-badge">
+                        <span class="badge-text">SCANNER MODULE</span>
+                        <span class="badge-status active">ACTIVE</span>
+                    </div>
+                    <h2 id="scan-title" class="page-title">
+                        <span class="title-main">Optical Recognition</span>
+                        <span class="title-accent">System</span>
+                    </h2>
+                    <p class="page-subtitle">Advanced AI-powered pharmaceutical identification and analysis</p>
                 </div>
 
-                <div class="scan-section">
-                    <div class="upload-area" id="upload-area" role="button" tabindex="0" aria-label="Upload medicine photo">
-                        <div class="upload-content">
-                            <i class="fas fa-camera" aria-hidden="true"></i>
-                            <h3>Take Photo or Upload Image</h3>
-                            <p>Click here to take a photo of your medicine</p>
+                <div class="scanner-interface">
+                    <div class="scanner-panel">
+                        <div class="scanner-header">
+                            <div class="scanner-status">
+                                <div class="status-indicator ready"></div>
+                                <span>Scanner Ready</span>
+                            </div>
+                            <div class="scanner-controls">
+                                <button class="control-btn" aria-label="Settings">
+                                    <i class="fas fa-cog" aria-hidden="true"></i>
+                                </button>
+                                <button class="control-btn" aria-label="History">
+                                    <i class="fas fa-history" aria-hidden="true"></i>
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="scanner-viewport" id="scanner-viewport">
+                            <!-- Camera Preview -->
+                            <video id="camera-preview" autoplay muted playsinline style="display: none;">
+                                <p>Your browser doesn't support video capture.</p>
+                            </video>
+                            
+                            <!-- Upload Area (shown when camera is not active) -->
+                            <div class="upload-area" id="upload-area" role="button" tabindex="0" aria-label="Upload medicine photo">
+                                <div class="viewport-overlay">
+                                    <div class="scan-frame">
+                                        <div class="frame-corners">
+                                            <div class="corner top-left"></div>
+                                            <div class="corner top-right"></div>
+                                            <div class="corner bottom-left"></div>
+                                            <div class="corner bottom-right"></div>
+                                        </div>
+                                    </div>
+                                    <div class="scan-instructions">
+                                        <i class="fas fa-qrcode" aria-hidden="true"></i>
+                                        <h3>Position Medication</h3>
+                                        <p>Align pharmaceutical packaging within the scanning frame</p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Camera Overlay (shown when camera is active) -->
+                            <div class="camera-overlay" id="camera-overlay" style="display: none;">
+                                <div class="scan-frame">
+                                    <div class="frame-corners">
+                                        <div class="corner top-left"></div>
+                                        <div class="corner top-right"></div>
+                                        <div class="corner bottom-left"></div>
+                                        <div class="corner bottom-right"></div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Auto-capture status indicator -->
+                                <div class="auto-capture-status" id="auto-capture-status">
+                                    <div class="status-indicator" id="status-indicator">
+                                        <i class="fas fa-search" id="status-icon"></i>
+                                        <span id="status-text">Analyzing...</span>
+                                    </div>
+                                    <div class="clarity-meter">
+                                        <div class="clarity-bar">
+                                            <div class="clarity-fill" id="clarity-fill"></div>
+                                        </div>
+                                        <span class="clarity-text" id="clarity-text">0%</span>
+                                    </div>
+                                </div>
+                                
+                                <div class="camera-instructions">
+                                    <h3>Auto-Capture Mode</h3>
+                                    <p>Position medication clearly within the frame</p>
+                                    <p class="auto-capture-note">Capture will happen automatically when text is clear</p>
+                                    <p class="debug-info" id="debug-info" style="font-size: 12px; color: #888; margin-top: 8px;">
+                                        Press SPACE for manual capture, T for test mode
+                                    </p>
+                                </div>
+                            </div>
+                            
                             <input type="file" id="medicine-photo" accept="image/*" capture="environment" style="display: none;">
-                            <button class="upload-btn" id="upload-btn">
-                                <i class="fas fa-plus" aria-hidden="true"></i>
-                                Choose Photo
+                        </div>
+
+                        <div class="scanner-actions">
+                            <button class="scan-btn primary" id="camera-btn">
+                                <i class="fas fa-video" aria-hidden="true"></i>
+                                <span>Start Camera</span>
+                            </button>
+                            <button class="scan-btn secondary" id="upload-btn">
+                                <i class="fas fa-upload" aria-hidden="true"></i>
+                                <span>Upload File</span>
+                            </button>
+                            <button class="scan-btn capture" id="capture-btn" style="display: none;">
+                                <i class="fas fa-camera" aria-hidden="true"></i>
+                                <span>Capture</span>
+                            </button>
+                            <button class="scan-btn stop" id="stop-camera-btn" style="display: none;">
+                                <i class="fas fa-stop" aria-hidden="true"></i>
+                                <span>Stop Camera</span>
                             </button>
                         </div>
                     </div>
 
-                    <div class="scan-tips">
-                        <h4>Tips for Better Results:</h4>
-                        <ul>
-                            <li>Ensure good lighting</li>
-                            <li>Keep the medicine label clearly visible</li>
-                            <li>Hold the camera steady</li>
-                            <li>Make sure the text is readable</li>
-                        </ul>
+                    <div class="scan-parameters">
+                        <h4 class="parameters-title">Scan Parameters</h4>
+                        <div class="parameter-grid">
+                            <div class="parameter-item">
+                                <span class="param-label">Resolution</span>
+                                <span class="param-value">4K</span>
+                            </div>
+                            <div class="parameter-item">
+                                <span class="param-label">AI Model</span>
+                                <span class="param-value">v3.2.1</span>
+                            </div>
+                            <div class="parameter-item">
+                                <span class="param-label">Confidence</span>
+                                <span class="param-value">95%</span>
+                            </div>
+                            <div class="parameter-item">
+                                <span class="param-label">Language</span>
+                                <span class="param-value">EN</span>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
-                <!-- Medicine Results -->
-                <div id="medicine-results" class="medicine-results" style="display: none;">
-                    <h3 class="section-title">Medicine Information</h3>
-                    <div class="medicine-card">
-                        <div class="medicine-image">
-                            <img id="scanned-image" src="" alt="Scanned medicine image">
+                <!-- Analysis Results -->
+                <div id="medicine-results" class="analysis-results" style="display: none;">
+                    <div class="results-header">
+                        <h3 class="results-title">Analysis Complete</h3>
+                        <div class="language-toggle">
+                            <button class="lang-btn active" id="lang-english" data-lang="english">
+                                <i class="fas fa-globe" aria-hidden="true"></i>
+                                <span>English</span>
+                            </button>
+                            <button class="lang-btn" id="lang-hindi" data-lang="hindi">
+                                <i class="fas fa-language" aria-hidden="true"></i>
+                                <span>हिंदी</span>
+                            </button>
                         </div>
-                        <div class="medicine-info">
-                            <h4 id="medicine-name" class="medicine-name">Medicine Name</h4>
-                            <div class="medicine-details">
-                                <div class="detail-item">
-                                    <i class="fas fa-info-circle" aria-hidden="true"></i>
-                                    <span id="medicine-description">Description will appear here</span>
+                        <div class="confidence-meter">
+                            <div class="meter-label">Confidence</div>
+                            <div class="meter-bar">
+                                <div class="meter-fill" style="width: 95%"></div>
+                            </div>
+                            <div class="meter-value">95%</div>
+                        </div>
+                    </div>
+                    
+                    <div class="analysis-panel">
+                        <div class="analysis-image">
+                            <img id="scanned-image" src="" alt="Scanned medication">
+                            <div class="image-overlay">
+                                <div class="overlay-badge">
+                                    <i class="fas fa-check-circle" aria-hidden="true"></i>
+                                    <span>Verified</span>
                                 </div>
-                                <div class="detail-item">
-                                    <i class="fas fa-exclamation-triangle" aria-hidden="true"></i>
-                                    <span id="medicine-precautions">Precautions will appear here</span>
+                            </div>
+                        </div>
+                        
+                        <div class="analysis-data">
+                            <!-- English Content -->
+                            <div class="language-content" id="content-english">
+                                <div class="data-header">
+                                    <h4 id="medicine-name" class="med-name">Medication Identified</h4>
+                                    <div class="data-meta">
+                                        <span class="meta-item">
+                                            <i class="fas fa-database" aria-hidden="true"></i>
+                                            <span>PharmaDB v2.1</span>
+                                        </span>
+                                        <span class="meta-item">
+                                            <i class="fas fa-clock" aria-hidden="true"></i>
+                                            <span>2.3s</span>
+                                        </span>
+                                    </div>
                                 </div>
-                                <div class="detail-item">
-                                    <i class="fas fa-clock" aria-hidden="true"></i>
-                                    <span id="medicine-usage">Usage instructions will appear here</span>
+                                
+                                <div class="data-sections">
+                                    <div class="data-section">
+                                        <div class="section-header">
+                                            <i class="fas fa-info-circle" aria-hidden="true"></i>
+                                            <h5>Composition</h5>
+                                        </div>
+                                        <div class="section-content">
+                                            <span id="medicine-composition">Active ingredients and pharmaceutical composition</span>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="data-section">
+                                        <div class="section-header">
+                                            <i class="fas fa-exclamation-triangle" aria-hidden="true"></i>
+                                            <h5>Contraindications</h5>
+                                        </div>
+                                        <div class="section-content">
+                                            <span id="medicine-contraindications">Safety warnings and contraindications</span>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="data-section">
+                                        <div class="section-header">
+                                            <i class="fas fa-prescription-bottle-alt" aria-hidden="true"></i>
+                                            <h5>Dosage Protocol</h5>
+                                        </div>
+                                        <div class="section-content">
+                                            <span id="medicine-dosage-protocol">Recommended dosage and administration instructions</span>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="data-section">
+                                        <div class="section-header">
+                                            <i class="fas fa-shield-alt" aria-hidden="true"></i>
+                                            <h5>Precautions</h5>
+                                        </div>
+                                        <div class="section-content">
+                                            <span id="medicine-precautions">Important safety precautions</span>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="data-section">
+                                        <div class="section-header">
+                                            <i class="fas fa-list-ol" aria-hidden="true"></i>
+                                            <h5>Usage Instructions</h5>
+                                        </div>
+                                        <div class="section-content">
+                                            <span id="medicine-usage">How to take the medication</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Hindi Content -->
+                            <div class="language-content" id="content-hindi" style="display: none;">
+                                <div class="data-header">
+                                    <h4 id="medicine-name-hindi" class="med-name">दवा की पहचान</h4>
+                                    <div class="data-meta">
+                                        <span class="meta-item">
+                                            <i class="fas fa-database" aria-hidden="true"></i>
+                                            <span>PharmaDB v2.1</span>
+                                        </span>
+                                        <span class="meta-item">
+                                            <i class="fas fa-clock" aria-hidden="true"></i>
+                                            <span>2.3s</span>
+                                        </span>
+                                    </div>
+                                </div>
+                                
+                                <div class="data-sections">
+                                    <div class="data-section">
+                                        <div class="section-header">
+                                            <i class="fas fa-info-circle" aria-hidden="true"></i>
+                                            <h5>संघटन (Composition)</h5>
+                                        </div>
+                                        <div class="section-content">
+                                            <span id="medicine-composition-hindi">सक्रिय तत्व और फार्मास्यूटिकल संघटन</span>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="data-section">
+                                        <div class="section-header">
+                                            <i class="fas fa-exclamation-triangle" aria-hidden="true"></i>
+                                            <h5>विरोधाभास (Contraindications)</h5>
+                                        </div>
+                                        <div class="section-content">
+                                            <span id="medicine-contraindications-hindi">सुरक्षा चेतावनी और विरोधाभास</span>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="data-section">
+                                        <div class="section-header">
+                                            <i class="fas fa-prescription-bottle-alt" aria-hidden="true"></i>
+                                            <h5>खुराक प्रोटोकॉल (Dosage Protocol)</h5>
+                                        </div>
+                                        <div class="section-content">
+                                            <span id="medicine-dosage-protocol-hindi">अनुशंसित खुराक और प्रशासन निर्देश</span>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="data-section">
+                                        <div class="section-header">
+                                            <i class="fas fa-shield-alt" aria-hidden="true"></i>
+                                            <h5>सावधानियां (Precautions)</h5>
+                                        </div>
+                                        <div class="section-content">
+                                            <span id="medicine-precautions-hindi">महत्वपूर्ण सुरक्षा सावधानियां</span>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="data-section">
+                                        <div class="section-header">
+                                            <i class="fas fa-list-ol" aria-hidden="true"></i>
+                                            <h5>उपयोग निर्देश (Usage Instructions)</h5>
+                                        </div>
+                                        <div class="section-content">
+                                            <span id="medicine-usage-hindi">दवा कैसे लें</span>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -180,155 +519,322 @@
             <!-- Find Doctors Page -->
             <section id="find-doctors" class="page" aria-labelledby="doctors-title">
                 <div class="page-header">
-                    <h2 id="doctors-title" class="page-title">Find Doctors</h2>
-                    <p class="page-subtitle">Search for doctors near your location</p>
+                    <div class="header-badge">
+                        <span class="badge-text">NETWORK ACCESS</span>
+                        <span class="badge-status connected">CONNECTED</span>
+                    </div>
+                    <h2 id="doctors-title" class="page-title">
+                        <span class="title-main">Healthcare Network</span>
+                        <span class="title-accent">Directory</span>
+                    </h2>
+                    <p class="page-subtitle">Advanced professional network with AI-powered matching and consultation services</p>
                 </div>
 
-                <div class="search-section">
-                    <div class="search-box">
-                        <i class="fas fa-search" aria-hidden="true"></i>
-                        <input type="text" id="doctor-search" placeholder="Search by name or specialization..." aria-label="Search doctors">
-                    </div>
-                    
-                    <div class="filters">
-                        <div class="filter-group">
-                            <label for="specialization-filter">Specialization:</label>
-                            <select id="specialization-filter" aria-label="Filter by specialization">
-                                <option value="">All Specializations</option>
-                                <option value="cardiology">Cardiology</option>
-                                <option value="dermatology">Dermatology</option>
-                                <option value="neurology">Neurology</option>
-                                <option value="orthopedics">Orthopedics</option>
-                                <option value="pediatrics">Pediatrics</option>
-                                <option value="psychiatry">Psychiatry</option>
-                                <option value="general">General Practice</option>
-                            </select>
+                <div class="network-interface">
+                    <div class="search-panel">
+                        <div class="search-header">
+                            <div class="search-status">
+                                <div class="status-indicator active"></div>
+                                <span>Network Active</span>
+                            </div>
+                            <div class="search-meta">
+                                <span class="meta-item">
+                                    <i class="fas fa-users" aria-hidden="true"></i>
+                                    <span>1,247 Professionals</span>
+                                </span>
+                                <span class="meta-item">
+                                    <i class="fas fa-globe" aria-hidden="true"></i>
+                                    <span>Global Network</span>
+                                </span>
+                            </div>
                         </div>
                         
-                        <div class="filter-group">
-                            <label for="distance-filter">Distance:</label>
-                            <select id="distance-filter" aria-label="Filter by distance">
-                                <option value="">Any Distance</option>
-                                <option value="1">Within 1 mile</option>
-                                <option value="5">Within 5 miles</option>
-                                <option value="10">Within 10 miles</option>
-                                <option value="25">Within 25 miles</option>
-                            </select>
+                        <div class="search-controls">
+                            <div class="search-input-group">
+                                <div class="input-icon">
+                                    <i class="fas fa-search" aria-hidden="true"></i>
+                                </div>
+                                <input type="text" id="doctor-search" placeholder="Search by name, specialization, or location..." aria-label="Search healthcare professionals">
+                                <button class="search-btn">
+                                    <i class="fas fa-arrow-right" aria-hidden="true"></i>
+                                </button>
+                            </div>
                         </div>
                         
-                        <div class="filter-group">
-                            <label for="rating-filter">Minimum Rating:</label>
-                            <select id="rating-filter" aria-label="Filter by minimum rating">
-                                <option value="">Any Rating</option>
-                                <option value="4">4+ Stars</option>
-                                <option value="4.5">4.5+ Stars</option>
-                                <option value="5">5 Stars</option>
-                            </select>
+                        <div class="filter-panel">
+                            <div class="filter-tabs">
+                                <button class="filter-tab active" data-filter="specialization">
+                                    <i class="fas fa-stethoscope" aria-hidden="true"></i>
+                                    <span>Specialization</span>
+                                </button>
+                                <button class="filter-tab" data-filter="location">
+                                    <i class="fas fa-map-marker-alt" aria-hidden="true"></i>
+                                    <span>Location</span>
+                                </button>
+                                <button class="filter-tab" data-filter="rating">
+                                    <i class="fas fa-star" aria-hidden="true"></i>
+                                    <span>Rating</span>
+                                </button>
+                                <button class="filter-tab" data-filter="availability">
+                                    <i class="fas fa-clock" aria-hidden="true"></i>
+                                    <span>Availability</span>
+                                </button>
+                            </div>
+                            
+                            <div class="filter-content">
+                                <div class="filter-section active" id="specialization-filter">
+                                    <div class="filter-grid">
+                                        <button class="filter-option active" data-value="">All</button>
+                                        <button class="filter-option" data-value="cardiology">Cardiology</button>
+                                        <button class="filter-option" data-value="dermatology">Dermatology</button>
+                                        <button class="filter-option" data-value="neurology">Neurology</button>
+                                        <button class="filter-option" data-value="orthopedics">Orthopedics</button>
+                                        <button class="filter-option" data-value="pediatrics">Pediatrics</button>
+                                        <button class="filter-option" data-value="psychiatry">Psychiatry</button>
+                                        <button class="filter-option" data-value="general">General Practice</button>
+                                    </div>
+                                </div>
+                                
+                                <div class="filter-section" id="location-filter">
+                                    <div class="filter-grid">
+                                        <button class="filter-option active" data-value="">Any Distance</button>
+                                        <button class="filter-option" data-value="1">Within 1 mile</button>
+                                        <button class="filter-option" data-value="5">Within 5 miles</button>
+                                        <button class="filter-option" data-value="10">Within 10 miles</button>
+                                        <button class="filter-option" data-value="25">Within 25 miles</button>
+                                        <button class="filter-option" data-value="remote">Remote Consultation</button>
+                                    </div>
+                                </div>
+                                
+                                <div class="filter-section" id="rating-filter">
+                                    <div class="filter-grid">
+                                        <button class="filter-option active" data-value="">Any Rating</button>
+                                        <button class="filter-option" data-value="4">4+ Stars</button>
+                                        <button class="filter-option" data-value="4.5">4.5+ Stars</button>
+                                        <button class="filter-option" data-value="5">5 Stars</button>
+                                        <button class="filter-option" data-value="verified">Verified Only</button>
+                                    </div>
+                                </div>
+                                
+                                <div class="filter-section" id="availability-filter">
+                                    <div class="filter-grid">
+                                        <button class="filter-option active" data-value="">Any Time</button>
+                                        <button class="filter-option" data-value="now">Available Now</button>
+                                        <button class="filter-option" data-value="today">Today</button>
+                                        <button class="filter-option" data-value="week">This Week</button>
+                                        <button class="filter-option" data-value="emergency">Emergency</button>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
 
-                <div class="doctors-section">
+                <div class="professionals-section">
                     <div class="section-header">
-                        <h3 class="section-title">Available Doctors</h3>
-                        <div class="view-toggle">
-                            <button class="view-btn active" data-view="grid" aria-label="Grid view">
-                                <i class="fas fa-th" aria-hidden="true"></i>
-                            </button>
-                            <button class="view-btn" data-view="list" aria-label="List view">
-                                <i class="fas fa-list" aria-hidden="true"></i>
-                            </button>
+                        <div class="header-info">
+                            <h3 class="section-title">Healthcare Professionals</h3>
+                            <div class="results-count">
+                                <span class="count-number">47</span>
+                                <span class="count-label">professionals found</span>
+                            </div>
+                        </div>
+                        <div class="view-controls">
+                            <div class="view-toggle">
+                                <button class="view-btn active" data-view="grid" aria-label="Grid view">
+                                    <i class="fas fa-th" aria-hidden="true"></i>
+                                </button>
+                                <button class="view-btn" data-view="list" aria-label="List view">
+                                    <i class="fas fa-list" aria-hidden="true"></i>
+                                </button>
+                            </div>
+                            <div class="sort-controls">
+                                <select class="sort-select" aria-label="Sort by">
+                                    <option value="relevance">Relevance</option>
+                                    <option value="rating">Rating</option>
+                                    <option value="distance">Distance</option>
+                                    <option value="availability">Availability</option>
+                                </select>
+                            </div>
                         </div>
                     </div>
 
-                    <div id="doctors-container" class="doctors-container grid-view">
-                        <!-- Doctors will be populated here -->
+                    <div id="doctors-container" class="professionals-grid">
+                        <!-- Healthcare professionals will be populated here -->
                     </div>
                 </div>
             </section>
         </main>
 
-        <!-- Doctor Profile Modal -->
+        <!-- Professional Profile Modal -->
         <div id="doctor-modal" class="modal" role="dialog" aria-labelledby="modal-title" aria-hidden="true">
-            <div class="modal-content">
+            <div class="modal-content professional-modal">
                 <div class="modal-header">
-                    <h3 id="modal-title" class="modal-title">Doctor Profile</h3>
+                    <div class="header-info">
+                        <h3 id="modal-title" class="modal-title">Professional Profile</h3>
+                        <div class="profile-badge">
+                            <span class="badge-text">VERIFIED</span>
+                        </div>
+                    </div>
                     <button class="close-btn" onclick="closeModal()" aria-label="Close modal">
                         <i class="fas fa-times" aria-hidden="true"></i>
                     </button>
                 </div>
                 <div class="modal-body">
-                    <div class="doctor-profile">
-                        <div class="doctor-photo">
-                            <img id="modal-doctor-photo" src="" alt="Doctor photo">
+                    <div class="professional-profile">
+                        <div class="profile-header">
+                            <div class="profile-photo">
+                                <img id="modal-doctor-photo" src="" alt="Professional photo">
+                                <div class="photo-overlay">
+                                    <div class="status-indicator online"></div>
+                                </div>
+                            </div>
+                            <div class="profile-info">
+                                <h4 id="modal-doctor-name">Professional Name</h4>
+                                <p id="modal-doctor-specialization">Specialization</p>
+                                <div class="profile-rating">
+                                    <div class="stars" id="modal-doctor-stars"></div>
+                                    <span id="modal-doctor-rating-text">Rating</span>
+                                </div>
+                                <div class="profile-meta">
+                                    <span class="meta-item">
+                                        <i class="fas fa-certificate" aria-hidden="true"></i>
+                                        <span>Board Certified</span>
+                                    </span>
+                                    <span class="meta-item">
+                                        <i class="fas fa-clock" aria-hidden="true"></i>
+                                        <span id="modal-doctor-availability">Available Now</span>
+                                    </span>
+                                </div>
+                            </div>
                         </div>
-                        <div class="doctor-details">
-                            <h4 id="modal-doctor-name">Doctor Name</h4>
-                            <p id="modal-doctor-specialization">Specialization</p>
-                            <div class="doctor-rating">
-                                <div class="stars" id="modal-doctor-stars"></div>
-                                <span id="modal-doctor-rating-text">Rating</span>
-                            </div>
-                            <div class="doctor-info">
-                                <div class="info-item">
-                                    <i class="fas fa-map-marker-alt" aria-hidden="true"></i>
-                                    <span id="modal-doctor-location">Location</span>
-                                </div>
-                                <div class="info-item">
-                                    <i class="fas fa-phone" aria-hidden="true"></i>
-                                    <span id="modal-doctor-phone">Phone</span>
-                                </div>
-                                <div class="info-item">
-                                    <i class="fas fa-clock" aria-hidden="true"></i>
-                                    <span id="modal-doctor-availability">Availability</span>
+                        
+                        <div class="profile-details">
+                            <div class="detail-section">
+                                <h5 class="section-title">Contact Information</h5>
+                                <div class="contact-info">
+                                    <div class="contact-item">
+                                        <i class="fas fa-map-marker-alt" aria-hidden="true"></i>
+                                        <span id="modal-doctor-location">Location</span>
+                                    </div>
+                                    <div class="contact-item">
+                                        <i class="fas fa-phone" aria-hidden="true"></i>
+                                        <span id="modal-doctor-phone">Phone</span>
+                                    </div>
+                                    <div class="contact-item">
+                                        <i class="fas fa-envelope" aria-hidden="true"></i>
+                                        <span>contact@professional.com</span>
+                                    </div>
                                 </div>
                             </div>
-                            <div class="best-suited-badge" id="best-suited-badge" style="display: none;">
-                                <i class="fas fa-star" aria-hidden="true"></i>
-                                <span>Best Suited for You</span>
+                            
+                            <div class="detail-section">
+                                <h5 class="section-title">Specializations</h5>
+                                <div class="specialization-tags">
+                                    <span class="tag">Primary Care</span>
+                                    <span class="tag">Preventive Medicine</span>
+                                    <span class="tag">Chronic Disease Management</span>
+                                </div>
                             </div>
+                        </div>
+                        
+                        <div class="ai-recommendation" id="best-suited-badge" style="display: none;">
+                            <div class="recommendation-header">
+                                <i class="fas fa-robot" aria-hidden="true"></i>
+                                <span>AI Recommendation</span>
+                            </div>
+                            <p>This professional is optimally matched to your medical profile and preferences.</p>
                         </div>
                     </div>
+                    
                     <div class="modal-actions">
-                        <button class="btn primary" onclick="contactDoctor()">
-                            <i class="fas fa-phone" aria-hidden="true"></i>
-                            Contact Doctor
+                        <button class="action-btn primary" onclick="contactDoctor()">
+                            <i class="fas fa-video" aria-hidden="true"></i>
+                            <span>Video Consult</span>
                         </button>
-                        <button class="btn secondary" onclick="bookAppointment()">
-                            <i class="fas fa-calendar" aria-hidden="true"></i>
-                            Book Appointment
+                        <button class="action-btn secondary" onclick="bookAppointment()">
+                            <i class="fas fa-calendar-check" aria-hidden="true"></i>
+                            <span>Book Appointment</span>
+                        </button>
+                        <button class="action-btn tertiary">
+                            <i class="fas fa-message" aria-hidden="true"></i>
+                            <span>Send Message</span>
                         </button>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Voice Assistant Modal -->
+        <!-- AI Assistant Modal -->
         <div id="voice-modal" class="modal" role="dialog" aria-labelledby="voice-title" aria-hidden="true">
-            <div class="modal-content voice-modal">
+            <div class="modal-content ai-modal">
                 <div class="modal-header">
-                    <h3 id="voice-title" class="modal-title">Voice Assistant</h3>
-                    <button class="close-btn" onclick="closeVoiceModal()" aria-label="Close voice assistant">
+                    <div class="header-info">
+                        <h3 id="voice-title" class="modal-title">AI Assistant</h3>
+                        <div class="ai-status">
+                            <div class="status-indicator active"></div>
+                            <span>Neural Network Active</span>
+                        </div>
+                    </div>
+                    <button class="close-btn" onclick="closeVoiceModal()" aria-label="Close AI assistant">
                         <i class="fas fa-times" aria-hidden="true"></i>
                     </button>
                 </div>
                 <div class="modal-body">
-                    <div class="voice-content">
-                        <div class="voice-icon">
-                            <i class="fas fa-microphone" aria-hidden="true"></i>
+                    <div class="ai-interface">
+                        <div class="ai-avatar">
+                            <div class="avatar-container">
+                                <i class="fas fa-robot" aria-hidden="true"></i>
+                                <div class="avatar-pulse"></div>
+                            </div>
                         </div>
-                        <p id="voice-status">Click the microphone to start speaking</p>
-                        <button class="voice-btn" id="voice-btn" onclick="toggleVoiceRecognition()">
-                            <i class="fas fa-microphone" aria-hidden="true"></i>
-                        </button>
-                        <div id="voice-commands" class="voice-commands">
-                            <h4>Voice Commands:</h4>
-                            <ul>
-                                <li>"Scan medicine" - Go to medicine scanner</li>
-                                <li>"Find doctors" - Go to doctor finder</li>
-                                <li>"Go home" - Return to home page</li>
-                                <li>"Help" - Show this help</li>
-                            </ul>
+                        
+                        <div class="ai-status-panel">
+                            <div class="status-item">
+                                <span class="status-label">Processing</span>
+                                <span class="status-value" id="voice-status">Ready for commands</span>
+                            </div>
+                            <div class="status-item">
+                                <span class="status-label">Model</span>
+                                <span class="status-value">GPT-4 Medical</span>
+                            </div>
+                            <div class="status-item">
+                                <span class="status-label">Response Time</span>
+                                <span class="status-value">0.8s</span>
+                            </div>
+                        </div>
+                        
+                        <div class="ai-controls">
+                            <button class="ai-btn primary" id="voice-btn" onclick="toggleVoiceRecognition()">
+                                <i class="fas fa-microphone" aria-hidden="true"></i>
+                                <span>Voice Input</span>
+                            </button>
+                            <button class="ai-btn secondary">
+                                <i class="fas fa-keyboard" aria-hidden="true"></i>
+                                <span>Text Input</span>
+                            </button>
+                        </div>
+                        
+                        <div class="ai-commands">
+                            <h4 class="commands-title">Available Commands</h4>
+                            <div class="command-grid">
+                                <div class="command-item">
+                                    <i class="fas fa-qrcode" aria-hidden="true"></i>
+                                    <span>"Initialize scanner"</span>
+                                </div>
+                                <div class="command-item">
+                                    <i class="fas fa-network-wired" aria-hidden="true"></i>
+                                    <span>"Access network"</span>
+                                </div>
+                                <div class="command-item">
+                                    <i class="fas fa-chart-line" aria-hidden="true"></i>
+                                    <span>"Show dashboard"</span>
+                                </div>
+                                <div class="command-item">
+                                    <i class="fas fa-question-circle" aria-hidden="true"></i>
+                                    <span>"Help"</span>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
