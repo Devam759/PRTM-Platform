@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MediScan Pro - Advanced Medical Assistant</title>
+    <title>MediScan - Advanced Medical Assistant</title>
     <link rel="stylesheet" href="css/style.css">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
@@ -23,16 +23,15 @@
                     </div>
                     <div class="logo-text">
                         <h1>MediScan</h1>
-                        <span class="logo-subtitle">PRO</span>
                     </div>
                 </div>
                 <div class="header-actions">
                     <button class="theme-toggle-btn" id="theme-toggle" aria-label="Toggle theme" title="Toggle theme">
                         <i class="fas fa-sun" id="theme-icon" aria-hidden="true"></i>
                     </button>
-                    <button class="ai-assist-btn" aria-label="AI Assistant" title="AI Assistant">
-                        <i class="fas fa-robot" aria-hidden="true"></i>
-                        <span>AI</span>
+                    <button class="auth-btn" onclick="showPage('auth')" aria-label="Login/Signup" title="Login/Signup">
+                        <i class="fas fa-sign-in-alt" aria-hidden="true"></i>
+                        <span>Login</span>
                     </button>
                     <button class="profile-btn" aria-label="Profile" title="Profile">
                         <i class="fas fa-user-circle" aria-hidden="true"></i>
@@ -79,10 +78,7 @@
             <!-- Home Page -->
             <section id="home" class="page active" aria-labelledby="home-title">
                 <div class="page-header">
-                    <div class="header-badge">
-                        <span class="badge-text">SYSTEM STATUS</span>
-                        <span class="badge-status online">ONLINE</span>
-                    </div>
+                    
                     <h2 id="home-title" class="page-title">
                         <span class="title-main">Medical Intelligence</span>
                         <span class="title-accent">Platform</span>
@@ -98,7 +94,6 @@
                             </div>
                             <div class="card-title">
                                 <h3>AI Analysis</h3>
-                                <span class="card-subtitle">Active</span>
                             </div>
                         </div>
                         <div class="card-content">
@@ -123,7 +118,6 @@
                             </div>
                             <div class="card-title">
                                 <h3>Scanner Module</h3>
-                                <span class="card-subtitle">Ready</span>
                             </div>
                         </div>
                         <div class="card-content">
@@ -142,7 +136,6 @@
                             </div>
                             <div class="card-title">
                                 <h3>Network Access</h3>
-                                <span class="card-subtitle">Connected</span>
                             </div>
                         </div>
                         <div class="card-content">
@@ -154,61 +147,13 @@
                         </div>
                     </div>
                 </div>
-
-                <div class="activity-panel">
-                    <div class="panel-header">
-                        <h3 class="panel-title">System Logs</h3>
-                        <div class="panel-controls">
-                            <button class="control-btn" aria-label="Refresh logs">
-                                <i class="fas fa-sync-alt" aria-hidden="true"></i>
-                            </button>
-                            <button class="control-btn" aria-label="Export logs">
-                                <i class="fas fa-download" aria-hidden="true"></i>
-                            </button>
-                        </div>
-                    </div>
-                    <div class="log-entries">
-                        <div class="log-entry success">
-                            <div class="log-timestamp">14:32:15</div>
-                            <div class="log-icon">
-                                <i class="fas fa-check-circle" aria-hidden="true"></i>
-                            </div>
-                            <div class="log-content">
-                                <div class="log-title">Scan Complete</div>
-                                <div class="log-detail">Acetaminophen 500mg identified with 99.2% confidence</div>
-                            </div>
-                        </div>
-                        <div class="log-entry info">
-                            <div class="log-timestamp">12:18:42</div>
-                            <div class="log-icon">
-                                <i class="fas fa-info-circle" aria-hidden="true"></i>
-                            </div>
-                            <div class="log-content">
-                                <div class="log-title">Network Query</div>
-                                <div class="log-detail">Connected to Dr. Sarah Chen - Cardiology specialist</div>
-                            </div>
-                        </div>
-                        <div class="log-entry warning">
-                            <div class="log-timestamp">09:45:33</div>
-                            <div class="log-icon">
-                                <i class="fas fa-exclamation-triangle" aria-hidden="true"></i>
-                            </div>
-                            <div class="log-content">
-                                <div class="log-title">Low Confidence</div>
-                                <div class="log-detail">Medication identification below 85% threshold</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                            
             </section>
 
             <!-- Scan Medicine Page -->
             <section id="scan-medicine" class="page" aria-labelledby="scan-title">
                 <div class="page-header">
-                    <div class="header-badge">
-                        <span class="badge-text">SCANNER MODULE</span>
-                        <span class="badge-status active">ACTIVE</span>
-                    </div>
+                    
                     <h2 id="scan-title" class="page-title">
                         <span class="title-main">Optical Recognition</span>
                         <span class="title-accent">System</span>
@@ -218,20 +163,7 @@
 
                 <div class="scanner-interface">
                     <div class="scanner-panel">
-                        <div class="scanner-header">
-                            <div class="scanner-status">
-                                <div class="status-indicator ready"></div>
-                                <span>Scanner Ready</span>
-                            </div>
-                            <div class="scanner-controls">
-                                <button class="control-btn" aria-label="Settings">
-                                    <i class="fas fa-cog" aria-hidden="true"></i>
-                                </button>
-                                <button class="control-btn" aria-label="History">
-                                    <i class="fas fa-history" aria-hidden="true"></i>
-                                </button>
-                            </div>
-                        </div>
+                        
                         
                         <div class="scanner-viewport" id="scanner-viewport">
                             <!-- Camera Preview -->
@@ -316,27 +248,6 @@
                         </div>
                     </div>
 
-                    <div class="scan-parameters">
-                        <h4 class="parameters-title">Scan Parameters</h4>
-                        <div class="parameter-grid">
-                            <div class="parameter-item">
-                                <span class="param-label">Resolution</span>
-                                <span class="param-value">4K</span>
-                            </div>
-                            <div class="parameter-item">
-                                <span class="param-label">AI Model</span>
-                                <span class="param-value">v3.2.1</span>
-                            </div>
-                            <div class="parameter-item">
-                                <span class="param-label">Confidence</span>
-                                <span class="param-value">95%</span>
-                            </div>
-                            <div class="parameter-item">
-                                <span class="param-label">Language</span>
-                                <span class="param-value">EN</span>
-                            </div>
-                        </div>
-                    </div>
                 </div>
 
                 <!-- Analysis Results -->
@@ -519,10 +430,7 @@
             <!-- Find Doctors Page -->
             <section id="find-doctors" class="page" aria-labelledby="doctors-title">
                 <div class="page-header">
-                    <div class="header-badge">
-                        <span class="badge-text">NETWORK ACCESS</span>
-                        <span class="badge-status connected">CONNECTED</span>
-                    </div>
+                    
                     <h2 id="doctors-title" class="page-title">
                         <span class="title-main">Healthcare Network</span>
                         <span class="title-accent">Directory</span>
@@ -664,6 +572,181 @@
                     </div>
                 </div>
             </section>
+
+            <!-- Login/Signup Page -->
+            <section id="auth" class="page" aria-labelledby="auth-title">
+                <div class="auth-container">
+                    <div class="auth-card">
+                        <div class="auth-header">
+                            <div class="logo">
+                                <div class="logo-icon">
+                                    <div class="logo-inner">
+                                        <i class="fas fa-crosshairs" aria-hidden="true"></i>
+                                    </div>
+                                </div>
+                                <div class="logo-text">
+                                    <h1>MediScan</h1>
+                                </div>
+                            </div>
+                            <p class="auth-subtitle">Access your medical intelligence platform</p>
+                        </div>
+
+                        <div class="auth-tabs">
+                            <button class="auth-tab active" data-tab="login">
+                                <i class="fas fa-sign-in-alt" aria-hidden="true"></i>
+                                <span>Login</span>
+                            </button>
+                            <button class="auth-tab" data-tab="signup">
+                                <i class="fas fa-user-plus" aria-hidden="true"></i>
+                                <span>Sign Up</span>
+                            </button>
+                        </div>
+
+                        <!-- Login Form -->
+                        <div class="auth-form active" id="login-form">
+                            <form class="form" id="loginForm">
+                                <div class="form-group">
+                                    <label for="login-email" class="form-label">Email Address</label>
+                                    <div class="input-group">
+                                        <i class="fas fa-envelope input-icon" aria-hidden="true"></i>
+                                        <input type="email" id="login-email" class="form-input" placeholder="Enter your email" required>
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="login-password" class="form-label">Password</label>
+                                    <div class="input-group">
+                                        <i class="fas fa-lock input-icon" aria-hidden="true"></i>
+                                        <input type="password" id="login-password" class="form-input" placeholder="Enter your password" required>
+                                        <button type="button" class="password-toggle" id="login-password-toggle">
+                                            <i class="fas fa-eye" aria-hidden="true"></i>
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <div class="form-options">
+                                    <label class="checkbox-label">
+                                        <input type="checkbox" id="remember-me">
+                                        <span class="checkmark"></span>
+                                        Remember me
+                                    </label>
+                                    <a href="#" class="forgot-password">Forgot password?</a>
+                                </div>
+
+                                <button type="submit" class="auth-btn primary">
+                                    <i class="fas fa-sign-in-alt" aria-hidden="true"></i>
+                                    <span>Sign In</span>
+                                </button>
+                            </form>
+                        </div>
+
+                        <!-- Signup Form -->
+                        <div class="auth-form" id="signup-form">
+                            <form class="form" id="signupForm">
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label for="signup-firstname" class="form-label">First Name</label>
+                                        <div class="input-group">
+                                            <i class="fas fa-user input-icon" aria-hidden="true"></i>
+                                            <input type="text" id="signup-firstname" class="form-input" placeholder="First name" required>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="signup-lastname" class="form-label">Last Name</label>
+                                        <div class="input-group">
+                                            <i class="fas fa-user input-icon" aria-hidden="true"></i>
+                                            <input type="text" id="signup-lastname" class="form-input" placeholder="Last name" required>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="signup-email" class="form-label">Email Address</label>
+                                    <div class="input-group">
+                                        <i class="fas fa-envelope input-icon" aria-hidden="true"></i>
+                                        <input type="email" id="signup-email" class="form-input" placeholder="Enter your email" required>
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="signup-password" class="form-label">Password</label>
+                                    <div class="input-group">
+                                        <i class="fas fa-lock input-icon" aria-hidden="true"></i>
+                                        <input type="password" id="signup-password" class="form-input" placeholder="Create a password" required>
+                                        <button type="button" class="password-toggle" id="signup-password-toggle">
+                                            <i class="fas fa-eye" aria-hidden="true"></i>
+                                        </button>
+                                    </div>
+                                    <div class="password-strength">
+                                        <div class="strength-bar">
+                                            <div class="strength-fill" id="strength-fill"></div>
+                                        </div>
+                                        <span class="strength-text" id="strength-text">Password strength</span>
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="signup-confirm-password" class="form-label">Confirm Password</label>
+                                    <div class="input-group">
+                                        <i class="fas fa-lock input-icon" aria-hidden="true"></i>
+                                        <input type="password" id="signup-confirm-password" class="form-input" placeholder="Confirm your password" required>
+                                        <button type="button" class="password-toggle" id="signup-confirm-password-toggle">
+                                            <i class="fas fa-eye" aria-hidden="true"></i>
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label class="checkbox-label">
+                                        <input type="checkbox" id="terms-agreement" required>
+                                        <span class="checkmark"></span>
+                                        I agree to the <a href="#" class="terms-link">Terms of Service</a> and <a href="#" class="terms-link">Privacy Policy</a>
+                                    </label>
+                                </div>
+
+                                <button type="submit" class="auth-btn primary">
+                                    <i class="fas fa-user-plus" aria-hidden="true"></i>
+                                    <span>Create Account</span>
+                                </button>
+                            </form>
+                        </div>
+
+                        <div class="auth-footer">
+                            <div class="divider">
+                                <span>or continue with</span>
+                            </div>
+                            <div class="social-auth">
+                                <button class="social-btn google" data-provider="google">
+                                    <i class="fab fa-google" aria-hidden="true"></i>
+                                    <span>Google</span>
+                                </button>
+                                <button class="social-btn apple" data-provider="apple">
+                                    <i class="fab fa-apple" aria-hidden="true"></i>
+                                    <span>Apple</span>
+                                </button>
+                                <button class="social-btn facebook" data-provider="facebook">
+                                    <i class="fab fa-facebook-f" aria-hidden="true"></i>
+                                    <span>Facebook</span>
+                                </button>
+                                <button class="social-btn microsoft" data-provider="microsoft">
+                                    <i class="fab fa-microsoft" aria-hidden="true"></i>
+                                    <span>Microsoft</span>
+                                </button>
+                            </div>
+                            
+                            <div class="mobile-auth-section">
+                                <div class="divider">
+                                    <span>or use mobile number</span>
+                                </div>
+                                <button class="mobile-auth-btn" onclick="showMobileAuth()">
+                                    <i class="fas fa-mobile-alt" aria-hidden="true"></i>
+                                    <span>Continue with Mobile</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
         </main>
 
         <!-- Professional Profile Modal -->
@@ -760,6 +843,132 @@
                             <i class="fas fa-message" aria-hidden="true"></i>
                             <span>Send Message</span>
                         </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mobile Authentication Modal -->
+        <div id="mobile-auth-modal" class="modal" role="dialog" aria-labelledby="mobile-auth-title" aria-hidden="true">
+            <div class="modal-content mobile-auth-modal">
+                <div class="modal-header">
+                    <div class="header-info">
+                        <h3 id="mobile-auth-title" class="modal-title">Mobile Authentication</h3>
+                        <div class="auth-method-badge">
+                            <i class="fas fa-mobile-alt" aria-hidden="true"></i>
+                            <span>SMS Verification</span>
+                        </div>
+                    </div>
+                    <button class="close-btn" onclick="closeMobileAuth()" aria-label="Close mobile auth">
+                        <i class="fas fa-times" aria-hidden="true"></i>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="mobile-auth-flow">
+                        <!-- Step 1: Enter Mobile Number -->
+                        <div class="auth-step active" id="mobile-number-step">
+                            <div class="step-header">
+                                <div class="step-number">1</div>
+                                <h4>Enter Mobile Number</h4>
+                                <p>We'll send you a verification code</p>
+                            </div>
+                            <form class="mobile-form" id="mobile-number-form">
+                                <div class="form-group">
+                                    <label for="country-code" class="form-label">Country Code</label>
+                                    <div class="country-selector">
+                                        <select id="country-code" class="form-select">
+                                            <option value="+1" data-flag="🇺🇸">🇺🇸 +1 (US)</option>
+                                            <option value="+44" data-flag="🇬🇧">🇬🇧 +44 (UK)</option>
+                                            <option value="+91" data-flag="🇮🇳" selected>🇮🇳 +91 (India)</option>
+                                            <option value="+86" data-flag="🇨🇳">🇨🇳 +86 (China)</option>
+                                            <option value="+81" data-flag="🇯🇵">🇯🇵 +81 (Japan)</option>
+                                            <option value="+49" data-flag="🇩🇪">🇩🇪 +49 (Germany)</option>
+                                            <option value="+33" data-flag="🇫🇷">🇫🇷 +33 (France)</option>
+                                            <option value="+61" data-flag="🇦🇺">🇦🇺 +61 (Australia)</option>
+                                            <option value="+55" data-flag="🇧🇷">🇧🇷 +55 (Brazil)</option>
+                                            <option value="+7" data-flag="🇷🇺">🇷🇺 +7 (Russia)</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label for="mobile-number" class="form-label">Mobile Number</label>
+                                    <div class="input-group">
+                                        <i class="fas fa-mobile-alt input-icon" aria-hidden="true"></i>
+                                        <input type="tel" id="mobile-number" class="form-input" placeholder="Enter your mobile number" required>
+                                    </div>
+                                </div>
+                                <button type="submit" class="auth-btn primary">
+                                    <i class="fas fa-paper-plane" aria-hidden="true"></i>
+                                    <span>Send Verification Code</span>
+                                </button>
+                            </form>
+                        </div>
+
+                        <!-- Step 2: Verify OTP -->
+                        <div class="auth-step" id="otp-verification-step">
+                            <div class="step-header">
+                                <div class="step-number">2</div>
+                                <h4>Verify Code</h4>
+                                <p>Enter the 6-digit code sent to <span id="mobile-display"></span></p>
+                            </div>
+                            <form class="mobile-form" id="otp-verification-form">
+                                <div class="otp-container">
+                                    <input type="text" class="otp-input" maxlength="1" data-index="0">
+                                    <input type="text" class="otp-input" maxlength="1" data-index="1">
+                                    <input type="text" class="otp-input" maxlength="1" data-index="2">
+                                    <input type="text" class="otp-input" maxlength="1" data-index="3">
+                                    <input type="text" class="otp-input" maxlength="1" data-index="4">
+                                    <input type="text" class="otp-input" maxlength="1" data-index="5">
+                                </div>
+                                <div class="otp-actions">
+                                    <button type="button" class="resend-btn" onclick="resendOTP()">
+                                        <i class="fas fa-redo" aria-hidden="true"></i>
+                                        <span>Resend Code</span>
+                                    </button>
+                                    <span class="timer" id="resend-timer">Resend in 30s</span>
+                                </div>
+                                <button type="submit" class="auth-btn primary">
+                                    <i class="fas fa-check" aria-hidden="true"></i>
+                                    <span>Verify & Continue</span>
+                                </button>
+                            </form>
+                        </div>
+
+                        <!-- Step 3: Complete Profile -->
+                        <div class="auth-step" id="profile-completion-step">
+                            <div class="step-header">
+                                <div class="step-number">3</div>
+                                <h4>Complete Profile</h4>
+                                <p>Add your details to complete registration</p>
+                            </div>
+                            <form class="mobile-form" id="profile-completion-form">
+                                <div class="form-group">
+                                    <label for="mobile-firstname" class="form-label">First Name</label>
+                                    <div class="input-group">
+                                        <i class="fas fa-user input-icon" aria-hidden="true"></i>
+                                        <input type="text" id="mobile-firstname" class="form-input" placeholder="First name" required>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label for="mobile-lastname" class="form-label">Last Name</label>
+                                    <div class="input-group">
+                                        <i class="fas fa-user input-icon" aria-hidden="true"></i>
+                                        <input type="text" id="mobile-lastname" class="form-input" placeholder="Last name" required>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label for="mobile-email" class="form-label">Email (Optional)</label>
+                                    <div class="input-group">
+                                        <i class="fas fa-envelope input-icon" aria-hidden="true"></i>
+                                        <input type="email" id="mobile-email" class="form-input" placeholder="Email address">
+                                    </div>
+                                </div>
+                                <button type="submit" class="auth-btn primary">
+                                    <i class="fas fa-user-check" aria-hidden="true"></i>
+                                    <span>Complete Registration</span>
+                                </button>
+                            </form>
+                        </div>
                     </div>
                 </div>
             </div>

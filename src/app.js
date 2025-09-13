@@ -10,6 +10,7 @@ require('dotenv').config();
 // Import routes
 const medicineRoutes = require('./routes/medicine');
 const doctorRoutes = require('./routes/doctor');
+const otpRoutes = require('./routes/otp');
 
 // Import middleware
 const { errorHandler, notFound } = require('./middleware/errorHandler');
@@ -63,7 +64,7 @@ app.use(requestLogger);
 app.use('/uploads', express.static(path.join(__dirname, '../public/uploads')));
 app.use(express.static(path.join(__dirname, '../public')));
 
-// MongoDB connection
+// MongoDB connection (optional for OTP functionality)
 const connectDB = async () => {
   try {
     const conn = await mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/healthcare-helper', {
@@ -72,13 +73,16 @@ const connectDB = async () => {
     });
     console.log(`✅ MongoDB Connected: ${conn.connection.host}`);
   } catch (error) {
-    console.error('❌ MongoDB connection error:', error);
-    process.exit(1);
+    console.warn('⚠️ MongoDB connection failed - running without database');
+    console.warn('   OTP functionality will work, but other features may be limited');
+    // Don't exit the process, allow the app to run without MongoDB
   }
 };
 
-// Connect to database
-connectDB();
+// Connect to database (non-blocking)
+connectDB().catch(() => {
+  console.log('📱 App running in limited mode without database');
+});
 
 // Health check endpoint
 app.get('/api/health', (req, res) => {
@@ -93,6 +97,7 @@ app.get('/api/health', (req, res) => {
 // API routes
 app.use('/api/medicine', medicineRoutes);
 app.use('/api/doctors', doctorRoutes);
+app.use('/api/otp', otpRoutes);
 
 // Serve the main application
 app.get('/', (req, res) => {

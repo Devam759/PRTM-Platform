@@ -250,6 +250,11 @@ class HealthCareHelper {
             this.stopCamera();
         }
 
+        // Initialize auth page if needed
+        if (pageName === 'auth') {
+            this.initializeAuthPage();
+        }
+
         // Announce page change for screen readers
         this.announcePageChange(pageName);
     }
@@ -258,7 +263,8 @@ class HealthCareHelper {
         const pageTitles = {
             'home': 'Home page',
             'scan-medicine': 'Scan Medicine page',
-            'find-doctors': 'Find Doctors page'
+            'find-doctors': 'Find Doctors page',
+            'auth': 'Authentication page'
         };
         
         const announcement = document.createElement('div');
@@ -875,10 +881,6 @@ class HealthCareHelper {
         
         // Save language preference
         localStorage.setItem('preferred-language', language);
-        
-        // Show notification
-        const langName = language === 'hindi' ? 'Hindi' : 'English';
-        this.showNotification(`Switched to ${langName}`, 'info');
     }
 
     // Doctor Management
@@ -1416,10 +1418,6 @@ class HealthCareHelper {
         this.applyTheme(this.currentTheme);
         this.updateThemeIcon();
         this.saveThemePreference();
-        
-        // Show notification
-        const themeName = this.currentTheme === 'light' ? 'Light' : 'Dark';
-        this.showNotification(`Switched to ${themeName} theme`, 'info');
     }
 
     applyTheme(theme) {
@@ -1514,6 +1512,781 @@ class HealthCareHelper {
         };
         return colors[type] || colors.info;
     }
+
+    // Authentication Functions
+    initializeAuthPage() {
+        this.setupAuthEventListeners();
+        this.setupPasswordStrength();
+        this.setupPasswordToggles();
+    }
+
+    setupAuthEventListeners() {
+        // Auth tab switching
+        document.querySelectorAll('.auth-tab').forEach(tab => {
+            tab.addEventListener('click', (e) => {
+                const tabType = e.currentTarget.dataset.tab;
+                this.switchAuthTab(tabType);
+            });
+        });
+
+        // Form submissions
+        const loginForm = document.getElementById('loginForm');
+        const signupForm = document.getElementById('signupForm');
+
+        if (loginForm) {
+            loginForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                this.handleLogin();
+            });
+        }
+
+        if (signupForm) {
+            signupForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                this.handleSignup();
+            });
+        }
+
+        // Social auth buttons
+        document.querySelectorAll('.social-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const provider = e.currentTarget.dataset.provider;
+                this.handleSocialAuth(provider);
+            });
+        });
+
+        // Forgot password
+        const forgotPassword = document.querySelector('.forgot-password');
+        if (forgotPassword) {
+            forgotPassword.addEventListener('click', (e) => {
+                e.preventDefault();
+                this.handleForgotPassword();
+            });
+        }
+    }
+
+    switchAuthTab(tabType) {
+        // Update tab buttons
+        document.querySelectorAll('.auth-tab').forEach(tab => {
+            tab.classList.remove('active');
+        });
+        document.querySelector(`[data-tab="${tabType}"]`).classList.add('active');
+
+        // Update forms
+        document.querySelectorAll('.auth-form').forEach(form => {
+            form.classList.remove('active');
+        });
+        document.getElementById(`${tabType}-form`).classList.add('active');
+    }
+
+    setupPasswordToggles() {
+        const passwordToggles = document.querySelectorAll('.password-toggle');
+        passwordToggles.forEach(toggle => {
+            toggle.addEventListener('click', (e) => {
+                const input = e.target.closest('.input-group').querySelector('input');
+                const icon = e.target;
+                
+                if (input.type === 'password') {
+                    input.type = 'text';
+                    icon.className = 'fas fa-eye-slash';
+                } else {
+                    input.type = 'password';
+                    icon.className = 'fas fa-eye';
+                }
+            });
+        });
+    }
+
+    setupPasswordStrength() {
+        const passwordInput = document.getElementById('signup-password');
+        if (passwordInput) {
+            passwordInput.addEventListener('input', (e) => {
+                this.updatePasswordStrength(e.target.value);
+            });
+        }
+
+        // Password confirmation validation
+        const confirmPasswordInput = document.getElementById('signup-confirm-password');
+        if (confirmPasswordInput) {
+            confirmPasswordInput.addEventListener('input', (e) => {
+                this.validatePasswordConfirmation();
+            });
+        }
+    }
+
+    updatePasswordStrength(password) {
+        const strengthFill = document.getElementById('strength-fill');
+        const strengthText = document.getElementById('strength-text');
+        
+        if (!strengthFill || !strengthText) return;
+
+        const strength = this.calculatePasswordStrength(password);
+        
+        // Remove all strength classes
+        strengthFill.className = 'strength-fill';
+        
+        // Add appropriate class and update text
+        if (strength.score < 25) {
+            strengthFill.classList.add('weak');
+            strengthText.textContent = 'Weak password';
+        } else if (strength.score < 50) {
+            strengthFill.classList.add('fair');
+            strengthText.textContent = 'Fair password';
+        } else if (strength.score < 75) {
+            strengthFill.classList.add('good');
+            strengthText.textContent = 'Good password';
+        } else {
+            strengthFill.classList.add('strong');
+            strengthText.textContent = 'Strong password';
+        }
+    }
+
+    calculatePasswordStrength(password) {
+        let score = 0;
+        const checks = {
+            length: password.length >= 8,
+            lowercase: /[a-z]/.test(password),
+            uppercase: /[A-Z]/.test(password),
+            numbers: /\d/.test(password),
+            symbols: /[!@#$%^&*(),.?":{}|<>]/.test(password)
+        };
+
+        // Calculate score based on checks
+        Object.values(checks).forEach(check => {
+            if (check) score += 20;
+        });
+
+        return { score, checks };
+    }
+
+    validatePasswordConfirmation() {
+        const password = document.getElementById('signup-password').value;
+        const confirmPassword = document.getElementById('signup-confirm-password').value;
+        const confirmInput = document.getElementById('signup-confirm-password');
+        
+        if (confirmPassword && password !== confirmPassword) {
+            confirmInput.style.borderColor = '#ef4444';
+            return false;
+        } else {
+            confirmInput.style.borderColor = '';
+            return true;
+        }
+    }
+
+    async handleLogin() {
+        const email = document.getElementById('login-email').value;
+        const password = document.getElementById('login-password').value;
+        const rememberMe = document.getElementById('remember-me').checked;
+
+        if (!email || !password) {
+            this.showNotification('Please fill in all fields', 'error');
+            return;
+        }
+
+        try {
+            this.showNotification('Signing in...', 'info');
+            
+            // Simulate API call
+            const response = await this.simulateApiCall('/api/auth/login', {
+                email,
+                password,
+                rememberMe
+            });
+
+            if (response.success) {
+                this.showNotification('Welcome back!', 'success');
+                localStorage.setItem('user', JSON.stringify(response.user));
+                localStorage.setItem('isAuthenticated', 'true');
+                
+                // Redirect to home page
+                setTimeout(() => {
+                    this.showPage('home');
+                }, 1000);
+            } else {
+                this.showNotification(response.message || 'Login failed', 'error');
+            }
+        } catch (error) {
+            console.error('Login error:', error);
+            this.showNotification('Login failed. Please try again.', 'error');
+        }
+    }
+
+    async handleSignup() {
+        const firstName = document.getElementById('signup-firstname').value;
+        const lastName = document.getElementById('signup-lastname').value;
+        const email = document.getElementById('signup-email').value;
+        const password = document.getElementById('signup-password').value;
+        const confirmPassword = document.getElementById('signup-confirm-password').value;
+        const termsAgreed = document.getElementById('terms-agreement').checked;
+
+        // Validation
+        if (!firstName || !lastName || !email || !password || !confirmPassword) {
+            this.showNotification('Please fill in all fields', 'error');
+            return;
+        }
+
+        if (password !== confirmPassword) {
+            this.showNotification('Passwords do not match', 'error');
+            return;
+        }
+
+        if (!termsAgreed) {
+            this.showNotification('Please agree to the terms and conditions', 'error');
+            return;
+        }
+
+        const passwordStrength = this.calculatePasswordStrength(password);
+        if (passwordStrength.score < 50) {
+            this.showNotification('Password is too weak. Please choose a stronger password.', 'error');
+            return;
+        }
+
+        try {
+            this.showNotification('Creating account...', 'info');
+            
+            // Simulate API call
+            const response = await this.simulateApiCall('/api/auth/signup', {
+                firstName,
+                lastName,
+                email,
+                password
+            });
+
+            if (response.success) {
+                this.showNotification('Account created successfully!', 'success');
+                localStorage.setItem('user', JSON.stringify(response.user));
+                localStorage.setItem('isAuthenticated', 'true');
+                
+                // Redirect to home page
+                setTimeout(() => {
+                    this.showPage('home');
+                }, 1000);
+            } else {
+                this.showNotification(response.message || 'Signup failed', 'error');
+            }
+        } catch (error) {
+            console.error('Signup error:', error);
+            this.showNotification('Signup failed. Please try again.', 'error');
+        }
+    }
+
+    handleSocialAuth(provider) {
+        this.showNotification(`Signing in with ${provider}...`, 'info');
+        
+        // Simulate social auth based on provider
+        setTimeout(() => {
+            const providerNames = {
+                'google': 'Google',
+                'apple': 'Apple',
+                'facebook': 'Facebook',
+                'microsoft': 'Microsoft'
+            };
+            
+            const providerName = providerNames[provider] || provider;
+            
+            // Simulate successful social auth
+            const response = this.simulateSocialAuth(provider);
+            if (response.success) {
+                this.showNotification(`Welcome! Signed in with ${providerName}`, 'success');
+                localStorage.setItem('user', JSON.stringify(response.user));
+                localStorage.setItem('isAuthenticated', 'true');
+                localStorage.setItem('authMethod', provider);
+                
+                // Redirect to home page
+                setTimeout(() => {
+                    this.showPage('home');
+                }, 1000);
+            } else {
+                this.showNotification(`Failed to sign in with ${providerName}`, 'error');
+            }
+        }, 1500);
+    }
+
+    simulateSocialAuth(provider) {
+        // Simulate different responses based on provider
+        const mockUsers = {
+            'google': {
+                id: Date.now(),
+                firstName: 'John',
+                lastName: 'Doe',
+                email: 'john.doe@gmail.com',
+                provider: 'google'
+            },
+            'apple': {
+                id: Date.now(),
+                firstName: 'Jane',
+                lastName: 'Smith',
+                email: 'jane.smith@icloud.com',
+                provider: 'apple'
+            },
+            'facebook': {
+                id: Date.now(),
+                firstName: 'Mike',
+                lastName: 'Johnson',
+                email: 'mike.johnson@facebook.com',
+                provider: 'facebook'
+            },
+            'microsoft': {
+                id: Date.now(),
+                firstName: 'Sarah',
+                lastName: 'Wilson',
+                email: 'sarah.wilson@outlook.com',
+                provider: 'microsoft'
+            }
+        };
+
+        return {
+            success: true,
+            user: mockUsers[provider] || mockUsers['google']
+        };
+    }
+
+    handleForgotPassword() {
+        const email = prompt('Enter your email address:');
+        if (email) {
+            this.showNotification('Password reset instructions sent to your email', 'success');
+        }
+    }
+
+    async simulateApiCall(endpoint, data) {
+        // Simulate network delay
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        
+        // Simulate API response
+        if (endpoint.includes('login')) {
+            if (data.email === 'demo@mediscan.com' && data.password === 'password') {
+                return {
+                    success: true,
+                    user: {
+                        id: 1,
+                        firstName: 'Demo',
+                        lastName: 'User',
+                        email: data.email
+                    }
+                };
+            } else {
+                return {
+                    success: false,
+                    message: 'Invalid email or password'
+                };
+            }
+        } else if (endpoint.includes('signup')) {
+            return {
+                success: true,
+                user: {
+                    id: Date.now(),
+                    firstName: data.firstName,
+                    lastName: data.lastName,
+                    email: data.email
+                }
+            };
+        } else if (endpoint.includes('send-otp')) {
+            // Simulate OTP sending
+            this.sentOTP = '123456'; // In real app, this would be generated server-side
+            return {
+                success: true,
+                message: 'OTP sent successfully'
+            };
+        } else if (endpoint.includes('verify-otp')) {
+            // Simulate OTP verification
+            if (data.otp === this.sentOTP) {
+                return {
+                    success: true,
+                    message: 'OTP verified successfully'
+                };
+            } else {
+                return {
+                    success: false,
+                    message: 'Invalid OTP. Please try again.'
+                };
+            }
+        } else if (endpoint.includes('complete-mobile-signup')) {
+            return {
+                success: true,
+                user: {
+                    id: Date.now(),
+                    firstName: data.firstName,
+                    lastName: data.lastName,
+                    email: data.email,
+                    mobileNumber: data.mobileNumber,
+                    authMethod: 'mobile'
+                }
+            };
+        }
+    }
+
+    checkAuthentication() {
+        const isAuthenticated = localStorage.getItem('isAuthenticated') === 'true';
+        if (!isAuthenticated) {
+            this.showPage('auth');
+        }
+    }
+
+    // Mobile Authentication Functions
+    showMobileAuth() {
+        const modal = document.getElementById('mobile-auth-modal');
+        modal.classList.add('active');
+        modal.setAttribute('aria-hidden', 'false');
+        this.setupMobileAuthEventListeners();
+        this.resetMobileAuthFlow();
+    }
+
+    closeMobileAuth() {
+        const modal = document.getElementById('mobile-auth-modal');
+        modal.classList.remove('active');
+        modal.setAttribute('aria-hidden', 'true');
+        this.resetMobileAuthFlow();
+    }
+
+    setupMobileAuthEventListeners() {
+        // Mobile number form
+        const mobileNumberForm = document.getElementById('mobile-number-form');
+        if (mobileNumberForm) {
+            mobileNumberForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                this.handleMobileNumberSubmit();
+            });
+        }
+
+        // OTP verification form
+        const otpForm = document.getElementById('otp-verification-form');
+        if (otpForm) {
+            otpForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                this.handleOTPVerification();
+            });
+        }
+
+        // Profile completion form
+        const profileForm = document.getElementById('profile-completion-form');
+        if (profileForm) {
+            profileForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                this.handleProfileCompletion();
+            });
+        }
+
+        // OTP input handling
+        this.setupOTPInputs();
+    }
+
+    setupOTPInputs() {
+        const otpInputs = document.querySelectorAll('.otp-input');
+        otpInputs.forEach((input, index) => {
+            input.addEventListener('input', (e) => {
+                const value = e.target.value;
+                
+                // Only allow numbers
+                if (!/^\d*$/.test(value)) {
+                    e.target.value = '';
+                    return;
+                }
+
+                // Move to next input if current is filled
+                if (value && index < otpInputs.length - 1) {
+                    otpInputs[index + 1].focus();
+                }
+
+                // Update visual state
+                if (value) {
+                    e.target.classList.add('filled');
+                } else {
+                    e.target.classList.remove('filled');
+                }
+
+                // Check if all inputs are filled
+                this.checkOTPCompletion();
+            });
+
+            input.addEventListener('keydown', (e) => {
+                // Handle backspace
+                if (e.key === 'Backspace' && !e.target.value && index > 0) {
+                    otpInputs[index - 1].focus();
+                }
+            });
+
+            input.addEventListener('paste', (e) => {
+                e.preventDefault();
+                const pastedData = e.clipboardData.getData('text');
+                if (/^\d{6}$/.test(pastedData)) {
+                    const digits = pastedData.split('');
+                    otpInputs.forEach((input, i) => {
+                        input.value = digits[i] || '';
+                        input.classList.toggle('filled', !!digits[i]);
+                    });
+                    this.checkOTPCompletion();
+                }
+            });
+        });
+    }
+
+    checkOTPCompletion() {
+        const otpInputs = document.querySelectorAll('.otp-input');
+        const allFilled = Array.from(otpInputs).every(input => input.value);
+        
+        if (allFilled) {
+            // Auto-submit OTP form
+            setTimeout(() => {
+                this.handleOTPVerification();
+            }, 500);
+        }
+    }
+
+    resetMobileAuthFlow() {
+        // Reset to step 1
+        document.querySelectorAll('.auth-step').forEach(step => {
+            step.classList.remove('active');
+        });
+        document.getElementById('mobile-number-step').classList.add('active');
+
+        // Clear forms
+        document.getElementById('mobile-number-form').reset();
+        document.getElementById('otp-verification-form').reset();
+        document.getElementById('profile-completion-form').reset();
+
+        // Clear OTP inputs
+        document.querySelectorAll('.otp-input').forEach(input => {
+            input.value = '';
+            input.classList.remove('filled');
+        });
+
+        // Reset timer
+        this.resetResendTimer();
+    }
+
+    async handleMobileNumberSubmit() {
+        const countryCode = document.getElementById('country-code').value;
+        const mobileNumber = document.getElementById('mobile-number').value;
+
+        if (!mobileNumber) {
+            this.showNotification('Please enter your mobile number', 'error');
+            return;
+        }
+
+        if (!/^\d{10}$/.test(mobileNumber)) {
+            this.showNotification('Please enter a valid 10-digit mobile number', 'error');
+            return;
+        }
+
+        try {
+            this.showNotification('Sending verification code...', 'info');
+            
+            console.log('🔍 Sending OTP request to:', `${this.apiBaseUrl}/api/otp/send`);
+            console.log('📱 Request data:', { countryCode, mobileNumber });
+            
+            // Call real OTP API
+            const response = await fetch(`${this.apiBaseUrl}/api/otp/send`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    countryCode,
+                    mobileNumber
+                })
+            });
+
+            console.log('📡 Response status:', response.status);
+            console.log('📡 Response headers:', response.headers);
+            
+            const result = await response.json();
+            console.log('📋 Response data:', result);
+
+            if (result.success) {
+                this.showNotification('Verification code sent!', 'success');
+                
+                // Store mobile number for display
+                this.currentMobileNumber = `${countryCode} ${mobileNumber}`;
+                this.currentCountryCode = countryCode;
+                this.currentMobileNumberOnly = mobileNumber;
+                document.getElementById('mobile-display').textContent = this.currentMobileNumber;
+                
+                // Move to step 2
+                this.goToAuthStep('otp-verification-step');
+                this.startResendTimer();
+                
+                // Show OTP in development mode
+                if (result.debug && result.debug.otp) {
+                    console.log('🔐 Development OTP:', result.debug.otp);
+                    this.showNotification(`Development OTP: ${result.debug.otp}`, 'info');
+                }
+            } else {
+                console.error('❌ OTP send failed:', result);
+                this.showNotification(result.message || 'Failed to send code', 'error');
+            }
+        } catch (error) {
+            console.error('❌ OTP send error:', error);
+            console.error('❌ Error details:', {
+                name: error.name,
+                message: error.message,
+                stack: error.stack
+            });
+            this.showNotification(`Failed to send verification code: ${error.message}`, 'error');
+        }
+    }
+
+    async handleOTPVerification() {
+        const otpInputs = document.querySelectorAll('.otp-input');
+        const otp = Array.from(otpInputs).map(input => input.value).join('');
+
+        if (otp.length !== 6) {
+            this.showNotification('Please enter the complete 6-digit code', 'error');
+            return;
+        }
+
+        try {
+            this.showNotification('Verifying code...', 'info');
+            
+            // Call real OTP verification API
+            const response = await fetch(`${this.apiBaseUrl}/api/otp/verify`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    countryCode: this.currentCountryCode,
+                    mobileNumber: this.currentMobileNumberOnly,
+                    otp
+                })
+            });
+
+            const result = await response.json();
+
+            if (result.success) {
+                this.showNotification('Code verified successfully!', 'success');
+                
+                // Move to step 3
+                this.goToAuthStep('profile-completion-step');
+            } else {
+                this.showNotification(result.message || 'Invalid verification code', 'error');
+                // Clear OTP inputs
+                otpInputs.forEach(input => {
+                    input.value = '';
+                    input.classList.remove('filled');
+                });
+                otpInputs[0].focus();
+            }
+        } catch (error) {
+            console.error('OTP verification error:', error);
+            this.showNotification('Failed to verify code', 'error');
+        }
+    }
+
+    async handleProfileCompletion() {
+        const firstName = document.getElementById('mobile-firstname').value;
+        const lastName = document.getElementById('mobile-lastname').value;
+        const email = document.getElementById('mobile-email').value;
+
+        if (!firstName || !lastName) {
+            this.showNotification('Please fill in your name', 'error');
+            return;
+        }
+
+        try {
+            this.showNotification('Creating account...', 'info');
+            
+            // Simulate API call
+            const response = await this.simulateApiCall('/api/auth/complete-mobile-signup', {
+                firstName,
+                lastName,
+                email,
+                mobileNumber: this.currentMobileNumber
+            });
+
+            if (response.success) {
+                this.showNotification('Account created successfully!', 'success');
+                localStorage.setItem('user', JSON.stringify(response.user));
+                localStorage.setItem('isAuthenticated', 'true');
+                localStorage.setItem('authMethod', 'mobile');
+                
+                // Close modal and redirect
+                this.closeMobileAuth();
+                setTimeout(() => {
+                    this.showPage('home');
+                }, 1000);
+            } else {
+                this.showNotification(response.message || 'Failed to create account', 'error');
+            }
+        } catch (error) {
+            console.error('Profile completion error:', error);
+            this.showNotification('Failed to create account', 'error');
+        }
+    }
+
+    goToAuthStep(stepId) {
+        document.querySelectorAll('.auth-step').forEach(step => {
+            step.classList.remove('active');
+        });
+        document.getElementById(stepId).classList.add('active');
+    }
+
+    startResendTimer() {
+        let timeLeft = 30;
+        const timerElement = document.getElementById('resend-timer');
+        const resendBtn = document.querySelector('.resend-btn');
+        
+        resendBtn.disabled = true;
+        
+        const timer = setInterval(() => {
+            timerElement.textContent = `Resend in ${timeLeft}s`;
+            timeLeft--;
+            
+            if (timeLeft < 0) {
+                clearInterval(timer);
+                resendBtn.disabled = false;
+                timerElement.textContent = 'Code not received?';
+            }
+        }, 1000);
+        
+        this.resendTimer = timer;
+    }
+
+    resetResendTimer() {
+        if (this.resendTimer) {
+            clearInterval(this.resendTimer);
+        }
+        const timerElement = document.getElementById('resend-timer');
+        const resendBtn = document.querySelector('.resend-btn');
+        
+        if (timerElement) timerElement.textContent = 'Resend in 30s';
+        if (resendBtn) resendBtn.disabled = true;
+    }
+
+    async resendOTP() {
+        try {
+            this.showNotification('Resending verification code...', 'info');
+            
+            // Call real OTP resend API
+            const response = await fetch(`${this.apiBaseUrl}/api/otp/resend`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    countryCode: this.currentCountryCode,
+                    mobileNumber: this.currentMobileNumberOnly
+                })
+            });
+
+            const result = await response.json();
+
+            if (result.success) {
+                this.showNotification('Verification code resent!', 'success');
+                this.startResendTimer();
+                
+                // Show OTP in development mode
+                if (result.debug && result.debug.otp) {
+                    console.log('🔐 Development OTP (Resent):', result.debug.otp);
+                    this.showNotification(`Development OTP: ${result.debug.otp}`, 'info');
+                }
+            } else {
+                this.showNotification(result.message || 'Failed to resend code', 'error');
+            }
+        } catch (error) {
+            console.error('Resend OTP error:', error);
+            this.showNotification('Failed to resend verification code', 'error');
+        }
+    }
 }
 
 // Global functions for HTML onclick handlers
@@ -1539,6 +2312,18 @@ function contactDoctor() {
 
 function bookAppointment() {
     healthcareHelper.bookAppointment();
+}
+
+function showMobileAuth() {
+    healthcareHelper.showMobileAuth();
+}
+
+function closeMobileAuth() {
+    healthcareHelper.closeMobileAuth();
+}
+
+function resendOTP() {
+    healthcareHelper.resendOTP();
 }
 
 // Initialize the application
