@@ -1,4 +1,4 @@
-// Vercel serverless function entry point
+// Complete Vercel serverless function with all features
 const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
@@ -86,9 +86,10 @@ app.get('/api/health', (req, res) => {
 app.get('/api/test', (req, res) => {
   res.json({
     success: true,
-    message: 'Serverless function is working!',
+    message: 'Complete PRTM Platform API is working!',
     timestamp: new Date().toISOString(),
-    environment: process.env.NODE_ENV || 'development'
+    environment: process.env.NODE_ENV || 'development',
+    features: ['OTP', 'Medicine', 'Doctor', 'Health Check']
   });
 });
 

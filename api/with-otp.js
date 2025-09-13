@@ -1,13 +1,11 @@
-// Vercel serverless function entry point
+// Vercel serverless function with OTP functionality
 const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
 const path = require('path');
 
-// Import routes
-const medicineRoutes = require('../src/routes/medicine');
-const doctorRoutes = require('../src/routes/doctor');
+// Import OTP routes
 const otpRoutes = require('../src/routes/otp');
 
 // Import middleware
@@ -86,15 +84,13 @@ app.get('/api/health', (req, res) => {
 app.get('/api/test', (req, res) => {
   res.json({
     success: true,
-    message: 'Serverless function is working!',
+    message: 'Serverless function with OTP is working!',
     timestamp: new Date().toISOString(),
     environment: process.env.NODE_ENV || 'development'
   });
 });
 
-// API routes
-app.use('/api/medicine', medicineRoutes);
-app.use('/api/doctors', doctorRoutes);
+// OTP routes
 app.use('/api/otp', otpRoutes);
 
 // Serve the main application
