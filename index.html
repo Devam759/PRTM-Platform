@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HealthCare Helper - Your Medical Assistant</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <meta name="description" content="Healthcare app designed for elderly users - scan medicines and find nearby doctors">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Header -->
+        <header class="header" role="banner">
+            <div class="header-content">
+                <div class="logo">
+                    <i class="fas fa-heartbeat" aria-hidden="true"></i>
+                    <h1>HealthCare Helper</h1>
+                </div>
+                <button class="voice-assist-btn" aria-label="Voice Assistant" title="Voice Assistant">
+                    <i class="fas fa-microphone" aria-hidden="true"></i>
+                </button>
+            </div>
+        </header>
+
+        <!-- Navigation -->
+        <nav class="main-nav" role="navigation" aria-label="Main navigation">
+            <ul class="nav-list">
+                <li class="nav-item">
+                    <button class="nav-btn active" data-page="home" aria-label="Go to Home page">
+                        <i class="fas fa-home" aria-hidden="true"></i>
+                        <span>Home</span>
+                    </button>
+                </li>
+                <li class="nav-item">
+                    <button class="nav-btn" data-page="scan-medicine" aria-label="Go to Scan Medicine page">
+                        <i class="fas fa-camera" aria-hidden="true"></i>
+                        <span>Scan Medicine</span>
+                    </button>
+                </li>
+                <li class="nav-item">
+                    <button class="nav-btn" data-page="find-doctors" aria-label="Go to Find Doctors page">
+                        <i class="fas fa-user-md" aria-hidden="true"></i>
+                        <span>Find Doctors</span>
+                    </button>
+                </li>
+            </ul>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="main-content" role="main">
+            <!-- Home Page -->
+            <section id="home" class="page active" aria-labelledby="home-title">
+                <div class="page-header">
+                    <h2 id="home-title" class="page-title">Welcome to HealthCare Helper</h2>
+                    <p class="page-subtitle">Your trusted medical assistant for medicine information and doctor finder</p>
+                </div>
+
+                <div class="welcome-section">
+                    <div class="welcome-card">
+                        <div class="welcome-icon">
+                            <i class="fas fa-heart" aria-hidden="true"></i>
+                        </div>
+                        <h3>Stay Healthy & Informed</h3>
+                        <p>Get instant information about your medicines and find the best doctors near you</p>
+                    </div>
+                </div>
+
+                <div class="quick-actions">
+                    <h3 class="section-title">Quick Actions</h3>
+                    <div class="action-buttons">
+                        <button class="action-btn primary" data-page="scan-medicine" aria-label="Scan medicine bottle or strip">
+                            <div class="action-icon">
+                                <i class="fas fa-camera" aria-hidden="true"></i>
+                            </div>
+                            <div class="action-content">
+                                <h4>Scan Medicine</h4>
+                                <p>Take a photo of your medicine to get information</p>
+                            </div>
+                        </button>
+                        
+                        <button class="action-btn secondary" data-page="find-doctors" aria-label="Find nearby doctors">
+                            <div class="action-icon">
+                                <i class="fas fa-user-md" aria-hidden="true"></i>
+                            </div>
+                            <div class="action-content">
+                                <h4>Find Doctors</h4>
+                                <p>Search for doctors near your location</p>
+                            </div>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="recent-activity">
+                    <h3 class="section-title">Recent Activity</h3>
+                    <div class="activity-list">
+                        <div class="activity-item">
+                            <div class="activity-icon">
+                                <i class="fas fa-pills" aria-hidden="true"></i>
+                            </div>
+                            <div class="activity-content">
+                                <h4>Medicine Scanned</h4>
+                                <p>Paracetamol 500mg - Yesterday</p>
+                            </div>
+                        </div>
+                        <div class="activity-item">
+                            <div class="activity-icon">
+                                <i class="fas fa-user-md" aria-hidden="true"></i>
+                            </div>
+                            <div class="activity-content">
+                                <h4>Doctor Found</h4>
+                                <p>Dr. Sarah Johnson - 2 days ago</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Scan Medicine Page -->
+            <section id="scan-medicine" class="page" aria-labelledby="scan-title">
+                <div class="page-header">
+                    <h2 id="scan-title" class="page-title">Scan Medicine</h2>
+                    <p class="page-subtitle">Take a photo of your medicine bottle or strip to get information</p>
+                </div>
+
+                <div class="scan-section">
+                    <div class="upload-area" id="upload-area" role="button" tabindex="0" aria-label="Upload medicine photo">
+                        <div class="upload-content">
+                            <i class="fas fa-camera" aria-hidden="true"></i>
+                            <h3>Take Photo or Upload Image</h3>
+                            <p>Click here to take a photo of your medicine</p>
+                            <input type="file" id="medicine-photo" accept="image/*" capture="environment" style="display: none;">
+                            <button class="upload-btn" id="upload-btn">
+                                <i class="fas fa-plus" aria-hidden="true"></i>
+                                Choose Photo
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="scan-tips">
+                        <h4>Tips for Better Results:</h4>
+                        <ul>
+                            <li>Ensure good lighting</li>
+                            <li>Keep the medicine label clearly visible</li>
+                            <li>Hold the camera steady</li>
+                            <li>Make sure the text is readable</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Medicine Results -->
+                <div id="medicine-results" class="medicine-results" style="display: none;">
+                    <h3 class="section-title">Medicine Information</h3>
+                    <div class="medicine-card">
+                        <div class="medicine-image">
+                            <img id="scanned-image" src="" alt="Scanned medicine image">
+                        </div>
+                        <div class="medicine-info">
+                            <h4 id="medicine-name" class="medicine-name">Medicine Name</h4>
+                            <div class="medicine-details">
+                                <div class="detail-item">
+                                    <i class="fas fa-info-circle" aria-hidden="true"></i>
+                                    <span id="medicine-description">Description will appear here</span>
+                                </div>
+                                <div class="detail-item">
+                                    <i class="fas fa-exclamation-triangle" aria-hidden="true"></i>
+                                    <span id="medicine-precautions">Precautions will appear here</span>
+                                </div>
+                                <div class="detail-item">
+                                    <i class="fas fa-clock" aria-hidden="true"></i>
+                                    <span id="medicine-usage">Usage instructions will appear here</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Find Doctors Page -->
+            <section id="find-doctors" class="page" aria-labelledby="doctors-title">
+                <div class="page-header">
+                    <h2 id="doctors-title" class="page-title">Find Doctors</h2>
+                    <p class="page-subtitle">Search for doctors near your location</p>
+                </div>
+
+                <div class="search-section">
+                    <div class="search-box">
+                        <i class="fas fa-search" aria-hidden="true"></i>
+                        <input type="text" id="doctor-search" placeholder="Search by name or specialization..." aria-label="Search doctors">
+                    </div>
+                    
+                    <div class="filters">
+                        <div class="filter-group">
+                            <label for="specialization-filter">Specialization:</label>
+                            <select id="specialization-filter" aria-label="Filter by specialization">
+                                <option value="">All Specializations</option>
+                                <option value="cardiology">Cardiology</option>
+                                <option value="dermatology">Dermatology</option>
+                                <option value="neurology">Neurology</option>
+                                <option value="orthopedics">Orthopedics</option>
+                                <option value="pediatrics">Pediatrics</option>
+                                <option value="psychiatry">Psychiatry</option>
+                                <option value="general">General Practice</option>
+                            </select>
+                        </div>
+                        
+                        <div class="filter-group">
+                            <label for="distance-filter">Distance:</label>
+                            <select id="distance-filter" aria-label="Filter by distance">
+                                <option value="">Any Distance</option>
+                                <option value="1">Within 1 mile</option>
+                                <option value="5">Within 5 miles</option>
+                                <option value="10">Within 10 miles</option>
+                                <option value="25">Within 25 miles</option>
+                            </select>
+                        </div>
+                        
+                        <div class="filter-group">
+                            <label for="rating-filter">Minimum Rating:</label>
+                            <select id="rating-filter" aria-label="Filter by minimum rating">
+                                <option value="">Any Rating</option>
+                                <option value="4">4+ Stars</option>
+                                <option value="4.5">4.5+ Stars</option>
+                                <option value="5">5 Stars</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="doctors-section">
+                    <div class="section-header">
+                        <h3 class="section-title">Available Doctors</h3>
+                        <div class="view-toggle">
+                            <button class="view-btn active" data-view="grid" aria-label="Grid view">
+                                <i class="fas fa-th" aria-hidden="true"></i>
+                            </button>
+                            <button class="view-btn" data-view="list" aria-label="List view">
+                                <i class="fas fa-list" aria-hidden="true"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div id="doctors-container" class="doctors-container grid-view">
+                        <!-- Doctors will be populated here -->
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <!-- Doctor Profile Modal -->
+        <div id="doctor-modal" class="modal" role="dialog" aria-labelledby="modal-title" aria-hidden="true">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 id="modal-title" class="modal-title">Doctor Profile</h3>
+                    <button class="close-btn" onclick="closeModal()" aria-label="Close modal">
+                        <i class="fas fa-times" aria-hidden="true"></i>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="doctor-profile">
+                        <div class="doctor-photo">
+                            <img id="modal-doctor-photo" src="" alt="Doctor photo">
+                        </div>
+                        <div class="doctor-details">
+                            <h4 id="modal-doctor-name">Doctor Name</h4>
+                            <p id="modal-doctor-specialization">Specialization</p>
+                            <div class="doctor-rating">
+                                <div class="stars" id="modal-doctor-stars"></div>
+                                <span id="modal-doctor-rating-text">Rating</span>
+                            </div>
+                            <div class="doctor-info">
+                                <div class="info-item">
+                                    <i class="fas fa-map-marker-alt" aria-hidden="true"></i>
+                                    <span id="modal-doctor-location">Location</span>
+                                </div>
+                                <div class="info-item">
+                                    <i class="fas fa-phone" aria-hidden="true"></i>
+                                    <span id="modal-doctor-phone">Phone</span>
+                                </div>
+                                <div class="info-item">
+                                    <i class="fas fa-clock" aria-hidden="true"></i>
+                                    <span id="modal-doctor-availability">Availability</span>
+                                </div>
+                            </div>
+                            <div class="best-suited-badge" id="best-suited-badge" style="display: none;">
+                                <i class="fas fa-star" aria-hidden="true"></i>
+                                <span>Best Suited for You</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-actions">
+                        <button class="btn primary" onclick="contactDoctor()">
+                            <i class="fas fa-phone" aria-hidden="true"></i>
+                            Contact Doctor
+                        </button>
+                        <button class="btn secondary" onclick="bookAppointment()">
+                            <i class="fas fa-calendar" aria-hidden="true"></i>
+                            Book Appointment
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Voice Assistant Modal -->
+        <div id="voice-modal" class="modal" role="dialog" aria-labelledby="voice-title" aria-hidden="true">
+            <div class="modal-content voice-modal">
+                <div class="modal-header">
+                    <h3 id="voice-title" class="modal-title">Voice Assistant</h3>
+                    <button class="close-btn" onclick="closeVoiceModal()" aria-label="Close voice assistant">
+                        <i class="fas fa-times" aria-hidden="true"></i>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="voice-content">
+                        <div class="voice-icon">
+                            <i class="fas fa-microphone" aria-hidden="true"></i>
+                        </div>
+                        <p id="voice-status">Click the microphone to start speaking</p>
+                        <button class="voice-btn" id="voice-btn" onclick="toggleVoiceRecognition()">
+                            <i class="fas fa-microphone" aria-hidden="true"></i>
+                        </button>
+                        <div id="voice-commands" class="voice-commands">
+                            <h4>Voice Commands:</h4>
+                            <ul>
+                                <li>"Scan medicine" - Go to medicine scanner</li>
+                                <li>"Find doctors" - Go to doctor finder</li>
+                                <li>"Go home" - Return to home page</li>
+                                <li>"Help" - Show this help</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
