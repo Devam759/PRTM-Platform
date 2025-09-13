@@ -67,9 +67,17 @@ app.use(express.static(path.join(__dirname, '../public')));
 // MongoDB connection (optional for OTP functionality)
 const connectDB = async () => {
   try {
-    const conn = await mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/healthcare-helper', {
+    // Skip MongoDB connection in serverless environment if no URI provided
+    if (!process.env.MONGODB_URI) {
+      console.log('📱 Running without database - MONGODB_URI not provided');
+      return;
+    }
+
+    const conn = await mongoose.connect(process.env.MONGODB_URI, {
       useNewUrlParser: true,
       useUnifiedTopology: true,
+      serverSelectionTimeoutMS: 5000, // Keep trying to send operations for 5 seconds
+      socketTimeoutMS: 45000, // Close sockets after 45 seconds of inactivity
     });
     console.log(`✅ MongoDB Connected: ${conn.connection.host}`);
   } catch (error) {
@@ -86,11 +94,32 @@ connectDB().catch(() => {
 
 // Health check endpoint
 app.get('/api/health', (req, res) => {
-  res.json({ 
-    status: 'OK', 
-    message: 'HealthCare Helper API is running',
+  try {
+    res.json({ 
+      status: 'OK', 
+      message: 'HealthCare Helper API is running',
+      timestamp: new Date().toISOString(),
+      version: process.env.npm_package_version || '1.0.0',
+      environment: process.env.NODE_ENV || 'development',
+      database: mongoose.connection.readyState === 1 ? 'connected' : 'disconnected'
+    });
+  } catch (error) {
+    console.error('Health check error:', error);
+    res.status(500).json({
+      status: 'ERROR',
+      message: 'Health check failed',
+      timestamp: new Date().toISOString()
+    });
+  }
+});
+
+// Simple test endpoint for Vercel
+app.get('/api/test', (req, res) => {
+  res.json({
+    success: true,
+    message: 'Serverless function is working!',
     timestamp: new Date().toISOString(),
-    version: process.env.npm_package_version || '1.0.0'
+    environment: process.env.NODE_ENV || 'development'
   });
 });
 
@@ -107,5 +136,28 @@ app.get('/', (req, res) => {
 // Error handling middleware
 app.use(notFound);
 app.use(errorHandler);
+
+// Graceful shutdown handling for serverless
+process.on('SIGTERM', () => {
+  console.log('SIGTERM received, shutting down gracefully');
+  process.exit(0);
+});
+
+process.on('SIGINT', () => {
+  console.log('SIGINT received, shutting down gracefully');
+  process.exit(0);
+});
+
+// Handle uncaught exceptions
+process.on('uncaughtException', (error) => {
+  console.error('Uncaught Exception:', error);
+  process.exit(1);
+});
+
+// Handle unhandled promise rejections
+process.on('unhandledRejection', (reason, promise) => {
+  console.error('Unhandled Rejection at:', promise, 'reason:', reason);
+  process.exit(1);
+});
 
 module.exports = app;

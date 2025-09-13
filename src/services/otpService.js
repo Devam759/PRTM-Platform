@@ -3,7 +3,11 @@ const smsService = require('./smsService');
 
 class OTPService {
   constructor() {
-    this.otpStore = new Map(); // In production, use Redis or database
+    // Use global variable for serverless compatibility
+    if (!global.otpStore) {
+      global.otpStore = new Map();
+    }
+    this.otpStore = global.otpStore;
     this.otpExpiry = 5 * 60 * 1000; // 5 minutes
   }
 
@@ -95,11 +99,15 @@ class OTPService {
 
   // Clean up expired OTPs
   cleanupExpiredOTPs() {
-    const now = Date.now();
-    for (const [mobileNumber, data] of this.otpStore.entries()) {
-      if (now > data.expiry) {
-        this.otpStore.delete(mobileNumber);
+    try {
+      const now = Date.now();
+      for (const [mobileNumber, data] of this.otpStore.entries()) {
+        if (now > data.expiry) {
+          this.otpStore.delete(mobileNumber);
+        }
       }
+    } catch (error) {
+      console.error('Error cleaning up expired OTPs:', error);
     }
   }
 
@@ -122,9 +130,11 @@ class OTPService {
 // Create singleton instance
 const otpService = new OTPService();
 
-// Clean up expired OTPs every 5 minutes
-setInterval(() => {
-  otpService.cleanupExpiredOTPs();
-}, 5 * 60 * 1000);
+// Clean up expired OTPs every 5 minutes (only in non-serverless environments)
+if (process.env.NODE_ENV !== 'production' || !process.env.VERCEL) {
+  setInterval(() => {
+    otpService.cleanupExpiredOTPs();
+  }, 5 * 60 * 1000);
+}
 
 module.exports = otpService;
