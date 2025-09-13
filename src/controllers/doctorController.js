@@ -1,13 +1,9 @@
-const express = require('express');
 const Doctor = require('../models/Doctor');
-const { validateDoctor } = require('../middleware/validation');
 
-const router = express.Router();
-
-// @route   GET /api/doctors/search
 // @desc    Search doctors by name, specialization, or location
+// @route   GET /api/doctors/search
 // @access  Public
-router.get('/search', async (req, res) => {
+const searchDoctors = async (req, res) => {
   try {
     const {
       q,
@@ -49,12 +45,12 @@ router.get('/search', async (req, res) => {
       error: process.env.NODE_ENV === 'development' ? error.message : 'Internal server error'
     });
   }
-});
+};
 
-// @route   GET /api/doctors/nearby
 // @desc    Find nearby doctors by coordinates
+// @route   GET /api/doctors/nearby
 // @access  Public
-router.get('/nearby', async (req, res) => {
+const findNearbyDoctors = async (req, res) => {
   try {
     const {
       latitude,
@@ -110,12 +106,12 @@ router.get('/nearby', async (req, res) => {
       error: process.env.NODE_ENV === 'development' ? error.message : 'Internal server error'
     });
   }
-});
+};
 
-// @route   GET /api/doctors/:id
 // @desc    Get doctor by ID
+// @route   GET /api/doctors/:id
 // @access  Public
-router.get('/:id', async (req, res) => {
+const getDoctorById = async (req, res) => {
   try {
     const doctor = await Doctor.findById(req.params.id)
       .populate('reviews.patientId', 'name email');
@@ -143,12 +139,12 @@ router.get('/:id', async (req, res) => {
       error: process.env.NODE_ENV === 'development' ? error.message : 'Internal server error'
     });
   }
-});
+};
 
-// @route   POST /api/doctors/:id/review
 // @desc    Add review for doctor
+// @route   POST /api/doctors/:id/review
 // @access  Private
-router.post('/:id/review', async (req, res) => {
+const addDoctorReview = async (req, res) => {
   try {
     const { patientId, rating, comment } = req.body;
 
@@ -197,12 +193,12 @@ router.post('/:id/review', async (req, res) => {
       error: process.env.NODE_ENV === 'development' ? error.message : 'Internal server error'
     });
   }
-});
+};
 
-// @route   GET /api/doctors/specializations/list
 // @desc    Get list of doctor specializations
+// @route   GET /api/doctors/specializations/list
 // @access  Public
-router.get('/specializations/list', async (req, res) => {
+const getSpecializations = async (req, res) => {
   try {
     const specializations = Doctor.schema.path('specialization').enumValues;
     
@@ -222,12 +218,12 @@ router.get('/specializations/list', async (req, res) => {
       error: process.env.NODE_ENV === 'development' ? error.message : 'Internal server error'
     });
   }
-});
+};
 
-// @route   POST /api/doctors
 // @desc    Create new doctor
+// @route   POST /api/doctors
 // @access  Private (Admin only)
-router.post('/', validateDoctor, async (req, res) => {
+const createDoctor = async (req, res) => {
   try {
     const doctor = new Doctor(req.body);
     await doctor.save();
@@ -256,12 +252,12 @@ router.post('/', validateDoctor, async (req, res) => {
       error: process.env.NODE_ENV === 'development' ? error.message : 'Internal server error'
     });
   }
-});
+};
 
-// @route   PUT /api/doctors/:id
 // @desc    Update doctor
+// @route   PUT /api/doctors/:id
 // @access  Private (Admin only)
-router.put('/:id', validateDoctor, async (req, res) => {
+const updateDoctor = async (req, res) => {
   try {
     const doctor = await Doctor.findByIdAndUpdate(
       req.params.id,
@@ -292,12 +288,12 @@ router.put('/:id', validateDoctor, async (req, res) => {
       error: process.env.NODE_ENV === 'development' ? error.message : 'Internal server error'
     });
   }
-});
+};
 
-// @route   DELETE /api/doctors/:id
 // @desc    Delete doctor (soft delete)
+// @route   DELETE /api/doctors/:id
 // @access  Private (Admin only)
-router.delete('/:id', async (req, res) => {
+const deleteDoctor = async (req, res) => {
   try {
     const doctor = await Doctor.findByIdAndUpdate(
       req.params.id,
@@ -325,6 +321,15 @@ router.delete('/:id', async (req, res) => {
       error: process.env.NODE_ENV === 'development' ? error.message : 'Internal server error'
     });
   }
-});
+};
 
-module.exports = router;
+module.exports = {
+  searchDoctors,
+  findNearbyDoctors,
+  getDoctorById,
+  addDoctorReview,
+  getSpecializations,
+  createDoctor,
+  updateDoctor,
+  deleteDoctor
+};

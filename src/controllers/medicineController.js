@@ -1,40 +1,12 @@
-const express = require('express');
-const multer = require('multer');
-const sharp = require('sharp');
-const path = require('path');
-const fs = require('fs');
 const Medicine = require('../models/Medicine');
 const ScanHistory = require('../models/ScanHistory');
-const { validateMedicine, validateScanRequest } = require('../middleware/validation');
+const { uploadImage, processImage } = require('../services/imageService');
+const { identifyMedicineFromImage } = require('../services/medicineService');
 
-const router = express.Router();
-
-// Configure multer for image uploads
-const storage = multer.memoryStorage();
-const upload = multer({
-  storage: storage,
-  limits: {
-    fileSize: 10 * 1024 * 1024, // 10MB limit
-  },
-  fileFilter: (req, file, cb) => {
-    if (file.mimetype.startsWith('image/')) {
-      cb(null, true);
-    } else {
-      cb(new Error('Only image files are allowed'), false);
-    }
-  }
-});
-
-// Ensure uploads directory exists
-const uploadsDir = path.join(__dirname, '../uploads');
-if (!fs.existsSync(uploadsDir)) {
-  fs.mkdirSync(uploadsDir, { recursive: true });
-}
-
-// @route   POST /api/medicine/scan
 // @desc    Scan medicine image and identify medicine
+// @route   POST /api/medicine/scan
 // @access  Public
-router.post('/scan', upload.single('image'), async (req, res) => {
+const scanMedicine = async (req, res) => {
   try {
     if (!req.file) {
       return res.status(400).json({
@@ -44,26 +16,10 @@ router.post('/scan', upload.single('image'), async (req, res) => {
     }
 
     // Process and save image
-    const imageBuffer = req.file.buffer;
-    const imageName = `medicine_${Date.now()}_${Math.random().toString(36).substr(2, 9)}.jpg`;
-    const imagePath = path.join(uploadsDir, imageName);
+    const imageUrl = await uploadImage(req.file);
     
-    // Resize and optimize image
-    await sharp(imageBuffer)
-      .resize(800, 600, { fit: 'inside', withoutEnlargement: true })
-      .jpeg({ quality: 85 })
-      .toFile(imagePath);
-
-    const imageUrl = `/uploads/${imageName}`;
-
-    // Simulate AI medicine identification
-    // In a real implementation, you would use computer vision APIs like:
-    // - Google Vision API
-    // - AWS Rekognition
-    // - Azure Computer Vision
-    // - Custom ML model
-    
-    const identifiedMedicine = await identifyMedicineFromImage(imageBuffer);
+    // Identify medicine from image
+    const identifiedMedicine = await identifyMedicineFromImage(req.file.buffer);
     
     if (!identifiedMedicine) {
       return res.status(404).json({
@@ -113,12 +69,12 @@ router.post('/scan', upload.single('image'), async (req, res) => {
       error: process.env.NODE_ENV === 'development' ? error.message : 'Internal server error'
     });
   }
-});
+};
 
-// @route   POST /api/medicine/barcode
 // @desc    Scan medicine by barcode
+// @route   POST /api/medicine/barcode
 // @access  Public
-router.post('/barcode', async (req, res) => {
+const scanBarcode = async (req, res) => {
   try {
     const { barcode, userId } = req.body;
 
@@ -176,12 +132,12 @@ router.post('/barcode', async (req, res) => {
       error: process.env.NODE_ENV === 'development' ? error.message : 'Internal server error'
     });
   }
-});
+};
 
-// @route   GET /api/medicine/search
 // @desc    Search medicines by name or keywords
+// @route   GET /api/medicine/search
 // @access  Public
-router.get('/search', async (req, res) => {
+const searchMedicines = async (req, res) => {
   try {
     const { q, category, prescription, limit = 20, skip = 0 } = req.query;
 
@@ -220,12 +176,12 @@ router.get('/search', async (req, res) => {
       error: process.env.NODE_ENV === 'development' ? error.message : 'Internal server error'
     });
   }
-});
+};
 
-// @route   GET /api/medicine/:id
 // @desc    Get medicine by ID
+// @route   GET /api/medicine/:id
 // @access  Public
-router.get('/:id', async (req, res) => {
+const getMedicineById = async (req, res) => {
   try {
     const medicine = await Medicine.findById(req.params.id);
 
@@ -252,12 +208,12 @@ router.get('/:id', async (req, res) => {
       error: process.env.NODE_ENV === 'development' ? error.message : 'Internal server error'
     });
   }
-});
+};
 
-// @route   POST /api/medicine
 // @desc    Create new medicine
+// @route   POST /api/medicine
 // @access  Private (Admin only)
-router.post('/', validateMedicine, async (req, res) => {
+const createMedicine = async (req, res) => {
   try {
     const medicine = new Medicine(req.body);
     await medicine.save();
@@ -286,12 +242,12 @@ router.post('/', validateMedicine, async (req, res) => {
       error: process.env.NODE_ENV === 'development' ? error.message : 'Internal server error'
     });
   }
-});
+};
 
-// @route   PUT /api/medicine/:id
 // @desc    Update medicine
+// @route   PUT /api/medicine/:id
 // @access  Private (Admin only)
-router.put('/:id', validateMedicine, async (req, res) => {
+const updateMedicine = async (req, res) => {
   try {
     const medicine = await Medicine.findByIdAndUpdate(
       req.params.id,
@@ -322,12 +278,12 @@ router.put('/:id', validateMedicine, async (req, res) => {
       error: process.env.NODE_ENV === 'development' ? error.message : 'Internal server error'
     });
   }
-});
+};
 
-// @route   DELETE /api/medicine/:id
 // @desc    Delete medicine (soft delete)
+// @route   DELETE /api/medicine/:id
 // @access  Private (Admin only)
-router.delete('/:id', async (req, res) => {
+const deleteMedicine = async (req, res) => {
   try {
     const medicine = await Medicine.findByIdAndUpdate(
       req.params.id,
@@ -355,12 +311,12 @@ router.delete('/:id', async (req, res) => {
       error: process.env.NODE_ENV === 'development' ? error.message : 'Internal server error'
     });
   }
-});
+};
 
-// @route   GET /api/medicine/categories/list
 // @desc    Get list of medicine categories
+// @route   GET /api/medicine/categories/list
 // @access  Public
-router.get('/categories/list', async (req, res) => {
+const getCategories = async (req, res) => {
   try {
     const categories = Medicine.schema.path('category').enumValues;
     
@@ -380,45 +336,15 @@ router.get('/categories/list', async (req, res) => {
       error: process.env.NODE_ENV === 'development' ? error.message : 'Internal server error'
     });
   }
-});
+};
 
-// Helper function to simulate AI medicine identification
-async function identifyMedicineFromImage(imageBuffer) {
-  // This is a simulation - in a real app, you would use computer vision APIs
-  // For demo purposes, we'll return a random medicine from the database
-  
-  try {
-    const medicines = await Medicine.find({ isActive: true }).limit(10);
-    
-    if (medicines.length === 0) {
-      return null;
-    }
-    
-    // Return a random medicine with some confidence score
-    const randomMedicine = medicines[Math.floor(Math.random() * medicines.length)];
-    
-    return {
-      _id: randomMedicine._id,
-      name: randomMedicine.name,
-      genericName: randomMedicine.genericName,
-      brandName: randomMedicine.brandName,
-      dosage: randomMedicine.dosage,
-      form: randomMedicine.form,
-      description: randomMedicine.description,
-      uses: randomMedicine.uses,
-      precautions: randomMedicine.precautions,
-      dosageInstructions: randomMedicine.dosageInstructions,
-      warnings: randomMedicine.warnings,
-      images: randomMedicine.images,
-      category: randomMedicine.category,
-      prescriptionRequired: randomMedicine.prescriptionRequired,
-      confidence: Math.floor(Math.random() * 20) + 80 // 80-100% confidence
-    };
-    
-  } catch (error) {
-    console.error('Error in medicine identification:', error);
-    return null;
-  }
-}
-
-module.exports = router;
+module.exports = {
+  scanMedicine,
+  scanBarcode,
+  searchMedicines,
+  getMedicineById,
+  createMedicine,
+  updateMedicine,
+  deleteMedicine,
+  getCategories
+};
